@@ -377,7 +377,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             p[Variant("email")] = Variant(provider.email ?? "")
             p[Variant("displayName")] = Variant(provider.displayName ?? "")
             p[Variant("photoURL")] = Variant(provider.photoURL?.absoluteString ?? "")
-            providers.append(value: Variant(p))
+            providers.append(Variant(p))
         }
         dict[Variant("providerData")] = Variant(providers)
         return dict
