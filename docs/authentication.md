@@ -5,181 +5,164 @@ layout: default
 ---
 
 # Authentication
-{: .no_toc }
 
 Firebase Authentication for iOS via the `FirebaseIOS.auth` autoload.
-{: .fs-6 .fw-300 }
-
-## Table of Contents
-{: .no_toc .text-delta }
-
-1. TOC
-{:toc}
-
----
-
-## Setup
-
-Connect signals before calling any auth methods:
-
-```gdscript
-func _ready() -> void:
-    FirebaseIOS.auth.auth_success.connect(_on_auth_success)
-    FirebaseIOS.auth.auth_failure.connect(_on_auth_failure)
-```
-
----
-
-## Methods
-
-### `sign_in_anonymously()`
-
-Signs in anonymously. If a session already exists, returns data for the current user without creating a new one.
-
-**Emits:** `auth_success` or `auth_failure`
-
----
-
-### `sign_in_with_google()`
-
-Initiates Google OAuth sign-in via `GIDSignIn`. Requires a physical iOS device (arm64).
-
-**Emits:** `auth_success` or `auth_failure`
-
----
-
-### `sign_in_with_apple()`
-
-Initiates Apple Sign-In via `ASAuthorization`.
-
-**Emits:** `auth_success` or `auth_failure`
-
----
-
-### `link_anonymous_with_google()`
-
-Links an existing anonymous account to a Google credential.
-
-**Emits:** `link_with_google_success` or `link_with_google_failure`
-
----
-
-### `link_with_apple()`
-
-Links an existing anonymous account to an Apple credential.
-
-**Emits:** `link_with_apple_success` or `link_with_apple_failure`
-
----
-
-### `sign_out()`
-
-Signs out from Firebase and Google.
-
-**Emits:** `sign_out_success`
-
----
-
-### `delete_current_user()`
-
-Deletes the current Firebase user.
-
-**Emits:** `user_deleted` or `auth_failure`
-
----
-
-### `is_signed_in() → bool`
-
-Returns `true` if a user session currently exists.
-
----
-
-### `get_current_user_data() → Dictionary`
-
-Returns the current user's data, or an empty `Dictionary` if no user is signed in. See [User Data](#user-data).
-
----
-
-### `use_emulator(host: String, port: int)`
-
-Connects to the Firebase Auth Emulator. Must be called after the plugin initializes.
-
----
 
 ## Signals
 
-| Signal | Payload | Description |
-|--------|---------|-------------|
-| `auth_success(current_user_data)` | `Dictionary` | Emitted on successful sign-in |
-| `auth_failure(error_message)` | `String` | Emitted on sign-in failure |
-| `sign_out_success(success)` | `bool` | Emitted after sign-out |
-| `user_deleted(success)` | `bool` | Emitted after user deletion |
-| `link_with_google_success(current_user_data)` | `Dictionary` | Emitted on successful Google link |
-| `link_with_google_failure(error_message)` | `String` | Emitted on Google link failure |
-| `link_with_apple_success(current_user_data)` | `Dictionary` | Emitted on successful Apple link |
-| `link_with_apple_failure(error_message)` | `String` | Emitted on Apple link failure |
+- `auth_success(current_user_data: Dictionary)`
+  Emitted when a user successfully signs in.
 
----
+- `auth_failure(error_message: String)`
+  Emitted when an authentication operation fails.
 
-## User Data
+- `link_with_google_success(current_user_data: Dictionary)`
+  Emitted when an anonymous user is successfully linked to a Google account.
 
-`auth_success`, `link_with_google_success`, and `link_with_apple_success` all emit a `Dictionary` with the following structure:
+- `link_with_google_failure(error_message: String)`
+  Emitted when linking an anonymous user to a Google account fails.
+
+- `link_with_apple_success(current_user_data: Dictionary)`
+  Emitted when an anonymous user is successfully linked to an Apple account.
+
+- `link_with_apple_failure(error_message: String)`
+  Emitted when linking an anonymous user to an Apple account fails.
+
+- `sign_out_success(success: bool)`
+  Emitted after a sign-out operation.
+
+- `user_deleted(success: bool)`
+  Emitted after an attempt to delete the current user.
+
+## Methods
+
+{: .text-green-100 }
+### sign_in_anonymously()
+
+Signs in anonymously. If a session already exists, returns data for the current user without creating a new one.
+
+**Emits:** `auth_success` or `auth_failure`.
 
 ```gdscript
-{
-    "uid":          "abc123",
-    "email":        "user@example.com",  # empty string if not available
-    "displayName":  "John Doe",          # empty string if not set
-    "photoURL":     "https://...",       # empty string if not set
-    "isAnonymous":  false,
-    "providerData": [                    # mirrors Firebase User.providerData
-        {
-            "providerId":  "google.com",
-            "uid":         "1234567890",
-            "email":       "user@example.com",
-            "displayName": "John Doe",
-            "photoURL":    "https://..."
-        }
-    ]
-}
+FirebaseIOS.auth.sign_in_anonymously()
 ```
 
-`get_current_user_data()` returns the same structure, or an empty `Dictionary` if no user is signed in.
+---
+
+{: .text-green-100 }
+### sign_in_with_google()
+
+Signs in using Google OAuth via `GIDSignIn`. Requires a physical iOS device (arm64).
+
+**Emits:** `auth_success` or `auth_failure`.
+
+```gdscript
+FirebaseIOS.auth.sign_in_with_google()
+```
 
 ---
 
-## Example
+{: .text-green-100 }
+### sign_in_with_apple()
+
+Signs in using Apple Sign-In via `ASAuthorization`.
+
+**Emits:** `auth_success` or `auth_failure`.
 
 ```gdscript
-extends Control
+FirebaseIOS.auth.sign_in_with_apple()
+```
 
-func _ready() -> void:
-    FirebaseIOS.auth.auth_success.connect(_on_auth_success)
-    FirebaseIOS.auth.auth_failure.connect(_on_auth_failure)
-    FirebaseIOS.auth.sign_out_success.connect(_on_sign_out_success)
+---
 
-func _on_sign_in_anonymously_pressed() -> void:
-    FirebaseIOS.auth.sign_in_anonymously()
+{: .text-green-100 }
+### link_anonymous_with_google()
 
-func _on_sign_in_with_google_pressed() -> void:
-    FirebaseIOS.auth.sign_in_with_google()
+Links the currently signed-in anonymous user to a Google account. The anonymous UID and data are preserved.
 
-func _on_sign_in_with_apple_pressed() -> void:
-    FirebaseIOS.auth.sign_in_with_apple()
+**Emits:** `link_with_google_success` or `link_with_google_failure`.
 
-func _on_sign_out_pressed() -> void:
-    FirebaseIOS.auth.sign_out()
+```gdscript
+FirebaseIOS.auth.link_anonymous_with_google()
+```
 
-func _on_auth_success(user_data: Dictionary) -> void:
-    print("Signed in: ", user_data.uid)
-    print("Anonymous: ", user_data.isAnonymous)
-    print("Providers: ", user_data.providerData)
+---
 
-func _on_auth_failure(error_message: String) -> void:
-    print("Auth error: ", error_message)
+{: .text-green-100 }
+### link_with_apple()
 
-func _on_sign_out_success(success: bool) -> void:
-    print("Signed out: ", success)
+Links the currently signed-in anonymous user to an Apple account. The anonymous UID and data are preserved.
+
+**Emits:** `link_with_apple_success` or `link_with_apple_failure`.
+
+```gdscript
+FirebaseIOS.auth.link_with_apple()
+```
+
+---
+
+{: .text-green-100 }
+### sign_out()
+
+Signs out from Firebase and Google.
+
+**Emits:** `sign_out_success`. Also emits `auth_failure` on failure.
+
+```gdscript
+FirebaseIOS.auth.sign_out()
+```
+
+---
+
+{: .text-green-100 }
+### delete_current_user()
+
+Deletes the currently signed-in Firebase user.
+
+**Emits:** `user_deleted`. Also emits `auth_failure` on failure.
+
+```gdscript
+FirebaseIOS.auth.delete_current_user()
+```
+
+---
+
+{: .text-green-100 }
+### is_signed_in() -> bool
+
+**Returns** `true` if a user session currently exists, otherwise `false`.
+
+```gdscript
+FirebaseIOS.auth.is_signed_in()
+```
+
+---
+
+{: .text-green-100 }
+### get_current_user_data() -> Dictionary
+
+**Returns** a dictionary with the current user's data, or an empty dictionary if no user is signed in.
+
+- `uid` — User ID
+- `email` — Email address (empty string if not available)
+- `displayName` — Display name (empty string if not set)
+- `photoURL` — Profile photo URL (empty string if not set)
+- `isAnonymous` — Whether the user is anonymous
+- `providerData` — Array of linked providers, each with `providerId`, `uid`, `email`, `displayName`, `photoURL`
+
+```gdscript
+var user = FirebaseIOS.auth.get_current_user_data()
+```
+
+---
+
+{: .text-green-100 }
+### use_emulator(host: String, port: int)
+
+Connects to the Firebase Auth Emulator. Call this before any auth operations.
+
+```gdscript
+FirebaseIOS.auth.use_emulator("localhost", 9099)
 ```
 
 ---

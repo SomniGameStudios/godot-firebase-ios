@@ -15,6 +15,10 @@ run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+FirebaseIOS="*res://addons/GodotFirebaseiOS/FirebaseIOS.gd"
+
 [display]
 
 window/size/viewport_width=720
@@ -25,10 +29,6 @@ window/size/window_height_override=800
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
-
-[autoload]
-
-FirebaseIOS="*res://addons/GodotFirebaseiOS/FirebaseIOS.gd"
 
 [editor_plugins]
 
