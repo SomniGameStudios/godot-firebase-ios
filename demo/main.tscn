@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://budyutqjqj503"]
+
+[ext_resource type="Script" uid="uid://gvpmnvu0ox6f" path="res://main.gd" id="1_main"]
+
+[node name="Main" type="Control" unique_id=12649841]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=832143659]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.31246597, 0.31246614, 0.31246597, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=513595300]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 100
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=265171909]
+layout_mode = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1501265163]
+layout_mode = 2
+theme_override_font_sizes/font_size = 42
+text = "Firebase Mobile Demo"
+horizontal_alignment = 1
+
+[node name="AuthButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1915608176]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Authentication"
+
+[node name="ComingSoon" type="Label" parent="MarginContainer/VBoxContainer" unique_id=671222534]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 24
+text = "More services coming soon..."
+horizontal_alignment = 1
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/AuthButton" to="." method="_on_auth_pressed"]

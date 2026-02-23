@@ -1,0 +1,17 @@
+# Swift Package Manager build cache
+.build/
+
+# SPM workspace state (generated when opening in Xcode)
+.swiftpm/
+
+# Xcode artifacts (generated when opening Package.swift directly in Xcode)
+DerivedData/
+xcuserdata/
+*.xcodeproj
+*.xcworkspace
+
+# Compiler intermediate files (all captured inside .build/, listed for clarity)
+*.dia
+*.swiftdeps
+*.swiftmodule
+*.abi.json

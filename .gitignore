@@ -1,0 +1,28 @@
+# Swift / Xcode
+.build/
+.swiftpm/
+DerivedData/
+xcuserdata/
+*.xcodeproj
+*.xcworkspace
+
+# Godot
+.godot/
+.import/
+
+# Demo export directories
+demo/ios/
+demo/android/
+
+# Firebase credentials (download from Firebase Console, never commit)
+GoogleService-Info.plist
+
+# Compiled framework (distributed via GitHub Releases)
+demo/addons/GodotFirebaseiOS/GodotFirebaseiOS.framework
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+/.claude
