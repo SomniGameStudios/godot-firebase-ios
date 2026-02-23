@@ -1,6 +1,7 @@
 ---
 title: Cloud Firestore
 nav_order: 3
+layout: default
 ---
 
 # Cloud Firestore
