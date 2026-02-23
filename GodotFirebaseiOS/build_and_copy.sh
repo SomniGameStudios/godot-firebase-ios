@@ -25,7 +25,10 @@ xcodebuild \
   -configuration "$CONFIGURATION" \
   -destination "generic/platform=iOS" \
   -derivedDataPath "$BUILD_PATH" \
-  -skipPackagePluginValidation
+  -skipPackagePluginValidation \
+  -skipMacroValidation \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO
 
 echo "📋 Locating built framework..."
 FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
