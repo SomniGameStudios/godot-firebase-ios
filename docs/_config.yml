@@ -1,0 +1,27 @@
+title: "Godot Firebase iOS"
+description: "Documentation for the GodotFirebaseiOS plugin"
+theme: just-the-docs
+color_scheme: dark
+url: "https://SomniGameStudios.github.io"
+baseurl: "/godot-firebase-ios"
+
+aux_links:
+  "GitHub":
+    - "https://github.com/SomniGameStudios/godot-firebase-ios"
+
+callouts_level: quiet
+callouts:
+  highlight:
+    color: yellow
+  important:
+    color: blue
+  new:
+    color: green
+  note:
+    color: purple
+  warning:
+    color: red
+
+back_to_top: true
+back_to_top_text: "Back to top"
+footer_content: "Copyright &copy; 2026 Somni Game Studios. Distributed under an <a href=\"https://github.com/SomniGameStudios/godot-firebase-ios/blob/main/LICENSE\">MIT license</a>."

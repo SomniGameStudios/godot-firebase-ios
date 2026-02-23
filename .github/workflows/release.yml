@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v1.0.1)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build framework (Release)
+        working-directory: GodotFirebaseiOS
+        run: |
+          xcodebuild \
+            -scheme GodotFirebaseiOS \
+            -sdk iphoneos \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath .build/xcodebuild
+
+      - name: Copy framework to addon
+        run: |
+          FRAMEWORK_SOURCE="GodotFirebaseiOS/.build/xcodebuild/Build/Products/Release-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
+          ADDON_PATH="demo/addons/GodotFirebaseiOS"
+          rm -rf "$ADDON_PATH/GodotFirebaseiOS.framework"
+          cp -r "$FRAMEWORK_SOURCE" "$ADDON_PATH/"
+
+      - name: Package addon zip
+        run: |
+          cd demo
+          zip -r "../GodotFirebaseiOS-${{ inputs.version }}.zip" addons/GodotFirebaseiOS
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ inputs.version }}" \
+            --title "GodotFirebaseiOS ${{ inputs.version }}" \
+            --generate-notes \
+            "GodotFirebaseiOS-${{ inputs.version }}.zip"

@@ -105,7 +105,16 @@ func _on_auth_failure(error_message: String) -> void:
     "email": "user@example.com",
     "displayName": "John Doe",
     "photoURL": "https://...",
-    "isAnonymous": false
+    "isAnonymous": false,
+    "providerData": [           # mirrors Firebase User.providerData
+        {
+            "providerId":  "google.com",
+            "uid":         "1234567890",
+            "email":       "user@example.com",
+            "displayName": "John Doe",
+            "photoURL":    "https://..."
+        }
+    ]
 }
 ```
 

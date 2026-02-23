@@ -369,6 +369,17 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         dict[Variant("displayName")] = Variant(user.displayName ?? "")
         dict[Variant("photoURL")] = Variant(user.photoURL?.absoluteString ?? "")
         dict[Variant("isAnonymous")] = Variant(user.isAnonymous)
+        var providers = GArray()
+        for provider in user.providerData {
+            var p = GDictionary()
+            p[Variant("providerId")] = Variant(provider.providerID)
+            p[Variant("uid")] = Variant(provider.uid)
+            p[Variant("email")] = Variant(provider.email ?? "")
+            p[Variant("displayName")] = Variant(provider.displayName ?? "")
+            p[Variant("photoURL")] = Variant(provider.photoURL?.absoluteString ?? "")
+            providers.append(value: Variant(p))
+        }
+        dict[Variant("providerData")] = Variant(providers)
         return dict
     }
 }

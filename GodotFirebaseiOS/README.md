@@ -14,17 +14,6 @@ and exposes Firebase Authentication as `@Callable` functions and `@Signal` prope
 
 ---
 
-## Requirements
-
-| Tool | Version |
-|------|---------|
-| Xcode | 15+ |
-| Swift | 5.9+ |
-| iOS deployment target | 17+ |
-| macOS (build machine) | 14+ |
-
----
-
 ## Package Dependencies
 
 | Package | Requirement | Resolved |
@@ -65,7 +54,7 @@ Sources/GodotFirebaseiOS/
 | `sign_out()` | Signs out from Firebase and Google |
 | `delete_current_user()` | Deletes the current Firebase user |
 | `is_signed_in() → Bool` | Returns true if a user session exists |
-| `get_current_user_data() → GDictionary` | Returns `uid`, `email`, `displayName`, `photoURL`, `isAnonymous` |
+| `get_current_user_data() → GDictionary` | Returns `uid`, `email`, `displayName`, `photoURL`, `isAnonymous`, `providerData` |
 
 ### Signals emitted by `FirebaseAuthPlugin`
 
