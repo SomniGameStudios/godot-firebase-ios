@@ -3,5 +3,15 @@ entry_symbol = "swift_entry_point"
 compatibility_minimum = 4.4
 
 [libraries]
+macos.debug.x86_64 = "stubs/libstub_macos.dylib"
+macos.release.x86_64 = "stubs/libstub_macos.dylib"
+macos.debug.arm64 = "stubs/libstub_macos.dylib"
+macos.release.arm64 = "stubs/libstub_macos.dylib"
 ios.debug = "GodotFirebaseiOS.framework"
 ios.release = "GodotFirebaseiOS.framework"
+windows.debug.x86_64 = "stubs/stub.dll"
+windows.release.x86_64 = "stubs/stub.dll"
+android.debug.arm64 = "stubs/libstub_android.so"
+android.release.arm64 = "stubs/libstub_android.so"
+android.debug.x86_64 = "stubs/libstub_android.so"
+android.release.x86_64 = "stubs/libstub_android.so"
