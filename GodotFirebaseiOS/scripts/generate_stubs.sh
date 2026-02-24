@@ -32,7 +32,9 @@ rm "$DEST_DIR/libstub_macos_x86.dylib" "$DEST_DIR/libstub_macos_arm.dylib" 2>/de
 # Note: Using system gcc as a fallback placeholder
 gcc -shared "$STUB_SRC" -o "$DEST_DIR/libstub_android.so" 2>/dev/null || touch "$DEST_DIR/libstub_android.so"
 
-# 3. Windows stub (Empty DLL placeholder)
-touch "$DEST_DIR/stub.dll"
+# 3. Windows stub (DLL with valid entry point)
+# Requires mingw-w64 cross-compiler; if unavailable, stub.dll must be compiled on Windows with MSVC
+x86_64-w64-mingw32-gcc -shared "$STUB_SRC" -o "$DEST_DIR/stub.dll" 2>/dev/null || \
+    echo "⚠️  MinGW not available — Windows stub.dll must be compiled separately on Windows with MSVC"
 
 echo "✅ Stubs generated successfully."
