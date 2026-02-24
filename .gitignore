@@ -20,6 +20,15 @@ GoogleService-Info.plist
 # Compiled framework (distributed via GitHub Releases)
 demo/addons/GodotFirebaseiOS/GodotFirebaseiOS.framework
 
+# MSVC build artifacts
+*.obj
+*.lib
+*.exp
+compile_log.txt
+
+# Godot temp files
+~*.dll
+
 # macOS
 .DS_Store
 
