@@ -12,7 +12,7 @@ Designed to work alongside [GodotFirebaseAndroid](https://github.com/syntaxerror
 - Anonymous Sign-In
 - Google Sign-In
 - Apple Sign-In
-- Account linking (anonymous → Google, anonymous → Apple)
+- Account linking (Google, Apple)
 - Delete user
 - Firebase Auth Emulator support
 
