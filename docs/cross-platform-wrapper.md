@@ -15,7 +15,7 @@ This avoids duplicating logic in your game scenes — they just call `FirebaseWr
 - [GodotFirebaseiOS](https://github.com/SomniGameStudios/godot-firebase-ios) — iOS plugin
 - [GodotFirebaseAndroid](https://github.com/syntaxerror247/GodotFirebaseAndroid) — Android plugin
 
-Both plugins expose a consistent Auth API with the same signals and method names, so the wrapper is thin.
+Both plugins expose a consistent API with the same signals and method names for Auth and Firestore, so the wrapper is thin.
 
 ## FirebaseWrapper Autoload
 
@@ -43,8 +43,17 @@ var auth:
                 return Firebase.auth
         return null
 
+var firestore:
+    get:
+        match _platform:
+            Platform.IOS:
+                return FirebaseIOS.firestore
+            Platform.ANDROID:
+                return Firebase.firestore
+        return null
+
 func _ready() -> void:
-    if ClassDB.class_exists(&"FirebaseAuthPlugin"):
+    if ClassDB.class_exists(&"FirebaseCorePlugin"):
         _platform = Platform.IOS
         print("FirebaseWrapper: using iOS plugin")
     elif Engine.has_singleton("GodotFirebaseAndroid"):
@@ -70,9 +79,13 @@ func get_platform_name() -> String:
 func _ready() -> void:
     FirebaseWrapper.auth.auth_success.connect(_on_auth_success)
     FirebaseWrapper.auth.auth_failure.connect(_on_auth_failure)
+    FirebaseWrapper.firestore.get_task_completed.connect(_on_get)
 
 func _on_sign_in_pressed() -> void:
     FirebaseWrapper.auth.sign_in_anonymously()
+
+func _on_get_document_pressed() -> void:
+    FirebaseWrapper.firestore.get_document("users", "alice123")
 ```
 
 ## Notes
