@@ -49,6 +49,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 36
 text = "Authentication"
 
+[node name="FirestoreButton" type="Button" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Cloud Firestore"
+
 [node name="ComingSoon" type="Label" parent="MarginContainer/VBoxContainer" unique_id=671222534]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
@@ -57,3 +63,4 @@ text = "More services coming soon..."
 horizontal_alignment = 1
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/AuthButton" to="." method="_on_auth_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/FirestoreButton" to="." method="_on_firestore_pressed"]

@@ -23,10 +23,6 @@ func _connect_signals():
 	_plugin.connect("link_with_apple_success", link_with_apple_success.emit)
 	_plugin.connect("link_with_apple_failure", link_with_apple_failure.emit)
 
-func initialize() -> void:
-	if _plugin:
-		_plugin.initialize()
-
 func use_emulator(host: String, port: int) -> void:
 	if _plugin:
 		_plugin.use_emulator(host, port)

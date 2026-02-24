@@ -10,10 +10,6 @@ import UIKit
 
 @Godot
 class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
-    // iOS-internal signals (not in GodotFirebaseAndroid API — used by wrapper internally)
-    @Signal var firebase_initialized: SimpleSignal
-    @Signal("message") var firebase_error: SignalWithArguments<String>
-
     // Public signals — match GodotFirebaseAndroid Auth API exactly
     @Signal("current_user_data") var auth_success: SignalWithArguments<GDictionary>
     @Signal("error_message") var auth_failure: SignalWithArguments<String>
@@ -24,28 +20,14 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
     @Signal("current_user_data") var link_with_apple_success: SignalWithArguments<GDictionary>
     @Signal("error_message") var link_with_apple_failure: SignalWithArguments<String>
 
-    private var isInitialized = false
     private var appleSignInHelper: AppleSignInHelper?
 
-    // MARK: - Initialization (iOS-specific, called by wrapper internally)
-
-    @Callable
-    func initialize() {
-        guard !isInitialized else { return }
-        guard let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
-              let options = FirebaseOptions(contentsOfFile: path) else {
-            firebase_error.emit("GoogleService-Info.plist not found in app bundle. Add it to the Xcode project target.")
-            return
-        }
-        FirebaseApp.configure(options: options)
-        isInitialized = true
-        firebase_initialized.emit()
-    }
+    // MARK: - Emulator
 
     @Callable
     func use_emulator(host: String, port: Int) {
-        guard isInitialized else {
-            firebase_error.emit("Cannot configure emulator before initialization")
+        guard FirebaseApp.app() != nil else {
+            auth_failure.emit("Firebase not initialized. Call FirebaseIOS core.initialize() first.")
             return
         }
         Auth.auth().useEmulator(withHost: host, port: port)
@@ -55,7 +37,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 
     @Callable
     func sign_in_anonymously() {
-        guard isInitialized else {
+        guard FirebaseApp.app() != nil else {
             auth_failure.emit("Firebase not initialized")
             return
         }
@@ -84,7 +66,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 
     @Callable
     func sign_in_with_google() {
-        guard isInitialized else {
+        guard FirebaseApp.app() != nil else {
             auth_failure.emit("Firebase not initialized")
             return
         }
@@ -112,7 +94,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 
     @Callable
     func link_with_google() {
-        guard isInitialized else {
+        guard FirebaseApp.app() != nil else {
             link_with_google_failure.emit("Firebase not initialized")
             return
         }
@@ -146,7 +128,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 
     @Callable
     func sign_in_with_apple() {
-        guard isInitialized else {
+        guard FirebaseApp.app() != nil else {
             auth_failure.emit("Firebase not initialized")
             return
         }
@@ -175,7 +157,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 
     @Callable
     func link_with_apple() {
-        guard isInitialized else {
+        guard FirebaseApp.app() != nil else {
             link_with_apple_failure.emit("Firebase not initialized")
             return
         }
@@ -224,7 +206,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 
     @Callable
     func delete_current_user() {
-        guard isInitialized else {
+        guard FirebaseApp.app() != nil else {
             auth_failure.emit("Firebase not initialized")
             return
         }

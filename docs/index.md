@@ -13,6 +13,7 @@ Designed to work alongside [GodotFirebaseAndroid](https://github.com/syntaxerror
 ## Supported Features
 
 - Authentication (Anonymous, Google, Apple, account linking)
+- Cloud Firestore (CRUD, real-time listeners)
 
 ## Setup
 
