@@ -5,7 +5,8 @@ import SwiftGodotRuntime
     types: [
         FirebaseCorePlugin.self,
         FirebaseAuthPlugin.self,
-        FirebaseFirestorePlugin.self
+        FirebaseFirestorePlugin.self,
+        FirebaseRemoteConfigPlugin.self
     ],
     registerDocs: false
 )

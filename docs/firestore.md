@@ -10,19 +10,25 @@ Cloud Firestore for iOS via the `FirebaseIOS.firestore` autoload.
 
 ## Signals
 
-- `write_task_completed(status: bool, doc_id: String, data: Dictionary)`
+All task signals emit a single `result: Dictionary` with the following keys:
+- `status` (bool) — `true` on success, `false` on failure
+- `docID` (String) — the document ID
+- `data` (Dictionary) — document data (when applicable)
+- `error` (String) — error message (only on failure)
+
+- `write_task_completed(result: Dictionary)`
   Emitted after `add_document()` or `set_document()` completes.
 
-- `get_task_completed(status: bool, doc_id: String, data: Dictionary)`
+- `get_task_completed(result: Dictionary)`
   Emitted after `get_document()` completes, or once per document from `get_documents_in_collection()`.
 
-- `update_task_completed(status: bool, doc_id: String)`
+- `update_task_completed(result: Dictionary)`
   Emitted after `update_document()` completes.
 
-- `delete_task_completed(status: bool, doc_id: String)`
+- `delete_task_completed(result: Dictionary)`
   Emitted after `delete_document()` completes.
 
-- `document_changed(status: bool, doc_id: String, data: Dictionary)`
+- `document_changed(document_path: String, data: Dictionary)`
   Emitted when a listened document changes in real time.
 
 ## Methods
@@ -149,15 +155,17 @@ func _ready() -> void:
     FirebaseIOS.firestore.write_task_completed.connect(_on_write)
     FirebaseIOS.firestore.get_task_completed.connect(_on_get)
 
-func _on_write(status: bool, doc_id: String, data: Dictionary) -> void:
-    if status:
-        print("Document written: ", doc_id)
+func _on_write(result: Dictionary) -> void:
+    if result.get("status"):
+        print("Document written: ", result.get("docID"))
         # Now read it back
-        FirebaseIOS.firestore.get_document("users", doc_id)
+        FirebaseIOS.firestore.get_document("users", result.get("docID"))
+    else:
+        print("Write failed: ", result.get("error"))
 
-func _on_get(status: bool, doc_id: String, data: Dictionary) -> void:
-    if status:
-        print("Document data: ", data)
+func _on_get(result: Dictionary) -> void:
+    if result.get("status"):
+        print("Document data: ", result.get("data"))
 
 func create_user() -> void:
     FirebaseIOS.firestore.add_document("users", {
