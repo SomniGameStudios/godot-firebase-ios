@@ -15,20 +15,20 @@ func _ready() -> void:
 
 # --- Signal handlers ---
 
-func _on_write_completed(status: bool, doc_id: String, data: Dictionary) -> void:
-	_log("write", "status=%s doc_id=%s data=%s" % [status, doc_id, JSON.stringify(data)])
+func _on_write_completed(result: Dictionary) -> void:
+	_log("write", "status=%s docID=%s data=%s" % [result.get("status"), result.get("docID", ""), JSON.stringify(result.get("data", {}))])
 
-func _on_get_completed(status: bool, doc_id: String, data: Dictionary) -> void:
-	_log("get", "status=%s doc_id=%s data=%s" % [status, doc_id, JSON.stringify(data)])
+func _on_get_completed(result: Dictionary) -> void:
+	_log("get", "status=%s docID=%s data=%s" % [result.get("status"), result.get("docID", ""), JSON.stringify(result.get("data", {}))])
 
-func _on_update_completed(status: bool, doc_id: String) -> void:
-	_log("update", "status=%s doc_id=%s" % [status, doc_id])
+func _on_update_completed(result: Dictionary) -> void:
+	_log("update", "status=%s docID=%s" % [result.get("status"), result.get("docID", "")])
 
-func _on_delete_completed(status: bool, doc_id: String) -> void:
-	_log("delete", "status=%s doc_id=%s" % [status, doc_id])
+func _on_delete_completed(result: Dictionary) -> void:
+	_log("delete", "status=%s docID=%s" % [result.get("status"), result.get("docID", "")])
 
-func _on_document_changed(status: bool, doc_id: String, data: Dictionary) -> void:
-	_log("listener", "status=%s doc_id=%s data=%s" % [status, doc_id, JSON.stringify(data)])
+func _on_document_changed(document_path: String, data: Dictionary) -> void:
+	_log("listener", "path=%s data=%s" % [document_path, JSON.stringify(data)])
 
 # --- Actions ---
 

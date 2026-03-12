@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Cache Swift packages
+        uses: actions/cache@v5
+        with:
+          path: |
+            GodotFirebaseiOS/.build/checkouts
+            GodotFirebaseiOS/.build/repositories
+            GodotFirebaseiOS/.build/artifacts
+            GodotFirebaseiOS/.build/prebuilts
+          key: ${{ runner.os }}-spm-${{ hashFiles('GodotFirebaseiOS/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Build iOS framework (Debug)
+        run: ./GodotFirebaseiOS/build_and_copy.sh
