@@ -34,7 +34,7 @@ theme_override_constants/margin_bottom = 20
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -67,61 +67,127 @@ theme_override_font_sizes/font_size = 24
 placeholder_text = "Document ID (optional for add)"
 text = "test_doc"
 
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 
-[node name="AddDocument" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="AddDocument" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Add Document (auto ID)"
 
-[node name="SetDocument" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="SetDocument" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Set Document"
 
-[node name="GetDocument" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="GetDocument" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Get Document"
 
-[node name="GetCollection" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="GetCollection" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Get All Documents"
 
-[node name="UpdateDocument" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="UpdateDocument" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Update Document"
 
-[node name="DeleteDocument" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="DeleteDocument" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Delete Document"
 
-[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 
-[node name="Listen" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="QueryFiltered" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Query (value > 10)"
+
+[node name="QueryOrdered" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Query (ordered, limit 5)"
+
+[node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+
+[node name="Listen" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Listen to Document"
 
-[node name="StopListen" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="StopListen" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Stop Listening"
 
-[node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="ListenCollection" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Listen to Collection"
+
+[node name="StopListenCollection" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Stop Collection Listener"
+
+[node name="HSeparator5" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+
+[node name="BatchWrite" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Run Batch Write"
+
+[node name="Transaction" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Run Transaction"
+
+[node name="HSeparator6" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+
+[node name="ServerTimestamp" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Set Server Timestamp"
+
+[node name="IncrementValue" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Increment Value"
+
+[node name="HSeparator7" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
 [node name="ClearOutput" type="Button" parent="MarginContainer/VBoxContainer"]
@@ -133,18 +199,26 @@ text = "Clear Output"
 [node name="OutputPanel" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 200)
 theme_override_font_sizes/normal_font_size = 20
 text = ""
 scroll_following = true
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/AddDocument" to="." method="_on_add_document_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SetDocument" to="." method="_on_set_document_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GetDocument" to="." method="_on_get_document_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GetCollection" to="." method="_on_get_collection_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/UpdateDocument" to="." method="_on_update_document_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/DeleteDocument" to="." method="_on_delete_document_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Listen" to="." method="_on_listen_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/StopListen" to="." method="_on_stop_listen_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/AddDocument" to="." method="_on_add_document_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/SetDocument" to="." method="_on_set_document_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/GetDocument" to="." method="_on_get_document_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/GetCollection" to="." method="_on_get_collection_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/UpdateDocument" to="." method="_on_update_document_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/DeleteDocument" to="." method="_on_delete_document_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/QueryFiltered" to="." method="_on_query_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/QueryOrdered" to="." method="_on_query_ordered_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/Listen" to="." method="_on_listen_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/StopListen" to="." method="_on_stop_listen_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/ListenCollection" to="." method="_on_listen_collection_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/StopListenCollection" to="." method="_on_stop_listen_collection_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/BatchWrite" to="." method="_on_batch_write_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/Transaction" to="." method="_on_transaction_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/ServerTimestamp" to="." method="_on_server_timestamp_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/IncrementValue" to="." method="_on_increment_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/ClearOutput" to="." method="_on_clear_output_pressed"]

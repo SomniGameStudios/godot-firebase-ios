@@ -34,7 +34,7 @@ theme_override_constants/margin_bottom = 20
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -48,82 +48,170 @@ theme_override_font_sizes/font_size = 36
 text = "Authentication"
 horizontal_alignment = 1
 
-[node name="HSeparator1" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="HSeparator1" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 
-[node name="SignInAnonymous" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="SignInAnonymous" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
-theme_override_font_sizes/font_size = 26
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
 text = "Sign In Anonymously"
 
-[node name="SignInGoogle" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="SignInGoogle" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
-theme_override_font_sizes/font_size = 26
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
 text = "Sign In With Google"
 
-[node name="LinkGoogle" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="LinkGoogle" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
-theme_override_font_sizes/font_size = 26
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
 text = "Link With Google"
 
-[node name="SignInApple" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="SignInApple" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
-theme_override_font_sizes/font_size = 26
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
 text = "Sign In With Apple"
 
-[node name="LinkApple" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="LinkApple" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
-theme_override_font_sizes/font_size = 26
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
 text = "Link With Apple"
 
-[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 
-[node name="GetUser" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="EmailInput" type="LineEdit" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+placeholder_text = "Email"
+text = "test@example.com"
+
+[node name="PasswordInput" type="LineEdit" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+placeholder_text = "Password"
+secret = true
+
+[node name="CreateAccount" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Create Account (Email)"
+
+[node name="SignInEmail" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Sign In (Email)"
+
+[node name="ResetPassword" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Reset Password"
+
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+
+[node name="GetUser" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Get Current User"
 
-[node name="GetUID" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="GetUID" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Get UID"
 
-[node name="IsSignedIn" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="IsSignedIn" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Is Signed In"
 
-[node name="IsAnonymous" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="IsAnonymous" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Is Anonymous"
 
-[node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 
-[node name="SignOut" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="UpdateProfile" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Update Profile"
+
+[node name="SendVerification" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Send Email Verification"
+
+[node name="ReloadUser" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Reload User"
+
+[node name="GetIdToken" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Get ID Token"
+
+[node name="HSeparator5" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+
+[node name="StartStateListener" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Start State Listener"
+
+[node name="StopStateListener" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Stop State Listener"
+
+[node name="HSeparator6" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
+layout_mode = 2
+
+[node name="SignOut" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Sign Out"
 
-[node name="DeleteUser" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="DeleteUser" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Delete User"
 
-[node name="HSeparator5" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator7" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
 [node name="ClearOutput" type="Button" parent="MarginContainer/VBoxContainer"]
@@ -135,22 +223,30 @@ text = "Clear Output"
 [node name="OutputPanel" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 200)
 theme_override_font_sizes/normal_font_size = 20
 text = ""
 scroll_following = true
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SignInAnonymous" to="." method="_on_sign_in_anonymous_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SignInGoogle" to="." method="_on_sign_in_google_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/LinkGoogle" to="." method="_on_link_google_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SignInApple" to="." method="_on_sign_in_apple_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/LinkApple" to="." method="_on_link_apple_pressed"]
-
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GetUser" to="." method="_on_get_user_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GetUID" to="." method="_on_get_uid_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/IsSignedIn" to="." method="_on_is_signed_in_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/IsAnonymous" to="." method="_on_is_anonymous_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SignOut" to="." method="_on_sign_out_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/DeleteUser" to="." method="_on_delete_user_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/SignInAnonymous" to="." method="_on_sign_in_anonymous_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/SignInGoogle" to="." method="_on_sign_in_google_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/LinkGoogle" to="." method="_on_link_google_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/SignInApple" to="." method="_on_sign_in_apple_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/LinkApple" to="." method="_on_link_apple_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/CreateAccount" to="." method="_on_create_account_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/SignInEmail" to="." method="_on_sign_in_email_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/ResetPassword" to="." method="_on_reset_password_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/GetUser" to="." method="_on_get_user_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/GetUID" to="." method="_on_get_uid_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/IsSignedIn" to="." method="_on_is_signed_in_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/IsAnonymous" to="." method="_on_is_anonymous_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/UpdateProfile" to="." method="_on_update_profile_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/SendVerification" to="." method="_on_send_verification_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/ReloadUser" to="." method="_on_reload_user_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/GetIdToken" to="." method="_on_get_id_token_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/StartStateListener" to="." method="_on_start_state_listener_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/StopStateListener" to="." method="_on_stop_state_listener_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/SignOut" to="." method="_on_sign_out_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/ScrollVBox/DeleteUser" to="." method="_on_delete_user_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/ClearOutput" to="." method="_on_clear_output_pressed"]

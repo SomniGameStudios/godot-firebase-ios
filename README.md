@@ -12,15 +12,26 @@ Designed to work alongside [GodotFirebaseAndroid](https://github.com/syntaxerror
 - Anonymous Sign-In
 - Google Sign-In
 - Apple Sign-In
+- Email/Password Sign-In and user creation
+- Auth state listener
 - Account linking (Google, Apple)
 - Delete user
 - Firebase Auth Emulator support
 
-**Cloud Firestore** _(WIP)_
+**Cloud Firestore**
 - Add, set, get, update, delete documents
 - Get all documents in a collection
+- Queries with filters, ordering, and limits
+- Batched writes and transactions
 - Real-time document listeners
 - Firestore Emulator support
+
+**Remote Config**
+- Fetch, activate, and fetch-and-activate
+- Typed getters (string, bool, int, float, JSON)
+- Default values
+- Real-time config update listener
+- Value source and fetch status introspection
 
 ---
 

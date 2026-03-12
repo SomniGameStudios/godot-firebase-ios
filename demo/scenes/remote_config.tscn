@@ -107,6 +107,24 @@ custom_minimum_size = Vector2(0, 50)
 theme_override_font_sizes/font_size = 24
 text = "Get All Values"
 
+[node name="GetJson" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Get JSON Value"
+
+[node name="GetSource" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Get Value Source"
+
+[node name="FetchStatus" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Fetch Status"
+
 [node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
@@ -147,6 +165,9 @@ scroll_following = true
 [connection signal="pressed" from="MarginContainer/VBoxContainer/FetchAndActivate" to="." method="_on_fetch_and_activate_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/GetValue" to="." method="_on_get_value_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/GetAll" to="." method="_on_get_all_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/GetJson" to="." method="_on_get_json_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/GetSource" to="." method="_on_get_source_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/FetchStatus" to="." method="_on_fetch_status_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Listen" to="." method="_on_listen_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/StopListen" to="." method="_on_stop_listen_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/ClearOutput" to="." method="_on_clear_output_pressed"]

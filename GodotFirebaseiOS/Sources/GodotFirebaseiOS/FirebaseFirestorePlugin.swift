@@ -11,8 +11,17 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     @Signal("result") var delete_task_completed: SignalWithArguments<GDictionary>
     @Signal("document_path", "data") var document_changed: SignalWithArguments<String, GDictionary>
 
+    // New signals for queries, collection listeners, batches, transactions
+    @Signal("result") var query_task_completed: SignalWithArguments<GDictionary>
+    @Signal("collection_path", "documents") var collection_changed: SignalWithArguments<String, GArray>
+    @Signal("result") var batch_task_completed: SignalWithArguments<GDictionary>
+    @Signal("result") var transaction_task_completed: SignalWithArguments<GDictionary>
+
     private var db: Firestore?
     private var listeners: [String: ListenerRegistration] = [:]
+    private var collectionListeners: [String: ListenerRegistration] = [:]
+    private var batches: [Int: WriteBatch] = [:]
+    private var nextBatchId: Int = 0
 
     // MARK: - Setup
 
@@ -165,7 +174,7 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
         }
     }
 
-    // MARK: - Real-time Listeners
+    // MARK: - Real-time Document Listeners
 
     @Callable
     func listen_to_document(documentPath: String) {
@@ -194,6 +203,266 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
         listeners.removeValue(forKey: documentPath)
     }
 
+    // MARK: - Query Documents
+
+    @Callable
+    func query_documents(collection: String, filters: GArray, orderBy: String, orderDescending: Bool, limitCount: Int) {
+        guard let db else {
+            Task { @MainActor in self.query_task_completed.emit(self.buildResult(status: false, docID: "", error: "Firestore not initialized")) }
+            return
+        }
+        var query: Query = db.collection(collection)
+
+        // Apply filters
+        for i in 0..<filters.size() {
+            guard let filterVariant = filters[Int(i)],
+                  let filterDict = GDictionary(filterVariant),
+                  let fieldVariant = filterDict[Variant("field")],
+                  let field = String(fieldVariant),
+                  let opVariant = filterDict[Variant("op")],
+                  let op = String(opVariant),
+                  let valueVariant = filterDict[Variant("value")] else { continue }
+
+            let value = variantToSwift(valueVariant)
+
+            switch op {
+            case "==":
+                query = query.whereField(field, isEqualTo: value)
+            case "!=":
+                query = query.whereField(field, isNotEqualTo: value)
+            case "<":
+                query = query.whereField(field, isLessThan: value)
+            case "<=":
+                query = query.whereField(field, isLessThanOrEqualTo: value)
+            case ">":
+                query = query.whereField(field, isGreaterThan: value)
+            case ">=":
+                query = query.whereField(field, isGreaterThanOrEqualTo: value)
+            case "array_contains":
+                query = query.whereField(field, arrayContains: value)
+            case "in":
+                if let arr = value as? [Any] {
+                    query = query.whereField(field, in: arr)
+                }
+            case "not_in":
+                if let arr = value as? [Any] {
+                    query = query.whereField(field, notIn: arr)
+                }
+            case "array_contains_any":
+                if let arr = value as? [Any] {
+                    query = query.whereField(field, arrayContainsAny: arr)
+                }
+            default:
+                break
+            }
+        }
+
+        // Apply ordering
+        if !orderBy.isEmpty {
+            query = query.order(by: orderBy, descending: orderDescending)
+        }
+
+        // Apply limit
+        if limitCount > 0 {
+            query = query.limit(to: limitCount)
+        }
+
+        query.getDocuments { [weak self] querySnapshot, error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    self.query_task_completed.emit(self.buildResult(status: false, docID: "", error: error.localizedDescription))
+                    return
+                }
+                guard let documents = querySnapshot?.documents else {
+                    self.query_task_completed.emit(self.buildResult(status: true, docID: ""))
+                    return
+                }
+                var docsArray = GArray()
+                for doc in documents {
+                    var docDict = GDictionary()
+                    docDict[Variant("docID")] = Variant(doc.documentID)
+                    docDict[Variant("data")] = Variant(self.docDataToGDDict(doc.data()))
+                    docsArray.append(Variant(docDict))
+                }
+                var result = GDictionary()
+                result[Variant("status")] = Variant(true)
+                result[Variant("documents")] = Variant(docsArray)
+                self.query_task_completed.emit(result)
+            }
+        }
+    }
+
+    // MARK: - Real-time Collection Listeners
+
+    @Callable
+    func listen_to_collection(collection: String) {
+        guard let db else {
+            Task { @MainActor in self.collection_changed.emit(collection, GArray()) }
+            return
+        }
+        if collectionListeners[collection] != nil { return }
+        let registration = db.collection(collection).addSnapshotListener { [weak self] querySnapshot, error in
+            guard let self else { return }
+            Task { @MainActor in
+                if error != nil {
+                    self.collection_changed.emit(collection, GArray())
+                    return
+                }
+                guard let documents = querySnapshot?.documents else {
+                    self.collection_changed.emit(collection, GArray())
+                    return
+                }
+                var docsArray = GArray()
+                for doc in documents {
+                    var docDict = GDictionary()
+                    docDict[Variant("docID")] = Variant(doc.documentID)
+                    docDict[Variant("data")] = Variant(self.docDataToGDDict(doc.data()))
+                    docsArray.append(Variant(docDict))
+                }
+                self.collection_changed.emit(collection, docsArray)
+            }
+        }
+        collectionListeners[collection] = registration
+    }
+
+    @Callable
+    func stop_listening_to_collection(collection: String) {
+        collectionListeners[collection]?.remove()
+        collectionListeners.removeValue(forKey: collection)
+    }
+
+    // MARK: - WriteBatch
+
+    @Callable
+    func create_batch() -> Int {
+        guard let db else { return -1 }
+        let batchId = nextBatchId
+        nextBatchId += 1
+        batches[batchId] = db.batch()
+        return batchId
+    }
+
+    @Callable
+    func batch_set(batchId: Int, collection: String, documentId: String, data: GDictionary, merge: Bool) {
+        guard let db, let batch = batches[batchId] else { return }
+        let ref = db.collection(collection).document(documentId)
+        let swiftData = gdDictToSwift(data)
+        batch.setData(swiftData, forDocument: ref, merge: merge)
+    }
+
+    @Callable
+    func batch_update(batchId: Int, collection: String, documentId: String, data: GDictionary) {
+        guard let db, let batch = batches[batchId] else { return }
+        let ref = db.collection(collection).document(documentId)
+        let swiftData = gdDictToSwift(data)
+        batch.updateData(swiftData, forDocument: ref)
+    }
+
+    @Callable
+    func batch_delete(batchId: Int, collection: String, documentId: String) {
+        guard let db, let batch = batches[batchId] else { return }
+        let ref = db.collection(collection).document(documentId)
+        batch.deleteDocument(ref)
+    }
+
+    @Callable
+    func commit_batch(batchId: Int) {
+        guard let batch = batches[batchId] else {
+            Task { @MainActor in self.batch_task_completed.emit(self.buildResult(status: false, docID: "", error: "Invalid batch ID")) }
+            return
+        }
+        batch.commit { [weak self] error in
+            guard let self else { return }
+            Task { @MainActor in
+                self.batches.removeValue(forKey: batchId)
+                if let error {
+                    self.batch_task_completed.emit(self.buildResult(status: false, docID: "", error: error.localizedDescription))
+                    return
+                }
+                self.batch_task_completed.emit(self.buildResult(status: true, docID: ""))
+            }
+        }
+    }
+
+    // MARK: - Transactions
+
+    @Callable
+    func run_transaction(collection: String, documentId: String, updateData: GDictionary) {
+        guard let db else {
+            Task { @MainActor in self.transaction_task_completed.emit(self.buildResult(status: false, docID: documentId, error: "Firestore not initialized")) }
+            return
+        }
+        let ref = db.collection(collection).document(documentId)
+        let swiftUpdateData = gdDictToSwift(updateData)
+
+        db.runTransaction({ [weak self] (transaction, errorPointer) -> Any? in
+            guard let self else { return nil }
+            let snapshot: DocumentSnapshot
+            do {
+                try snapshot = transaction.getDocument(ref)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+            transaction.updateData(swiftUpdateData, forDocument: ref)
+            return snapshot.data()
+        }) { [weak self] result, error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    self.transaction_task_completed.emit(self.buildResult(status: false, docID: documentId, error: error.localizedDescription))
+                    return
+                }
+                if let data = result as? [String: Any] {
+                    self.transaction_task_completed.emit(self.buildResult(status: true, docID: documentId, data: self.docDataToGDDict(data)))
+                } else {
+                    self.transaction_task_completed.emit(self.buildResult(status: true, docID: documentId))
+                }
+            }
+        }
+    }
+
+    // MARK: - FieldValue Helpers
+
+    @Callable
+    func server_timestamp() -> GDictionary {
+        var dict = GDictionary()
+        dict[Variant("__type")] = Variant("serverTimestamp")
+        return dict
+    }
+
+    @Callable
+    func array_union(elements: GArray) -> GDictionary {
+        var dict = GDictionary()
+        dict[Variant("__type")] = Variant("arrayUnion")
+        dict[Variant("elements")] = Variant(elements)
+        return dict
+    }
+
+    @Callable
+    func array_remove(elements: GArray) -> GDictionary {
+        var dict = GDictionary()
+        dict[Variant("__type")] = Variant("arrayRemove")
+        dict[Variant("elements")] = Variant(elements)
+        return dict
+    }
+
+    @Callable
+    func increment_by(value: Int) -> GDictionary {
+        var dict = GDictionary()
+        dict[Variant("__type")] = Variant("increment")
+        dict[Variant("value")] = Variant(value)
+        return dict
+    }
+
+    @Callable
+    func delete_field() -> GDictionary {
+        var dict = GDictionary()
+        dict[Variant("__type")] = Variant("deleteField")
+        return dict
+    }
+
     // MARK: - Result Dictionary Builder
 
     private func buildResult(status: Bool, docID: String, data: GDictionary? = nil, error: String? = nil) -> GDictionary {
@@ -214,6 +483,38 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             let keyVariant = keys[Int(i)]
             guard let keyStr = String(keyVariant) else { continue }
             guard let value = gdDict[keyVariant] else { continue }
+
+            // Check for FieldValue sentinels
+            if value.gtype == .dictionary, let innerDict = GDictionary(value) {
+                if let typeVariant = innerDict[Variant("__type")], let typeStr = String(typeVariant) {
+                    switch typeStr {
+                    case "serverTimestamp":
+                        result[keyStr] = FieldValue.serverTimestamp()
+                        continue
+                    case "deleteField":
+                        result[keyStr] = FieldValue.delete()
+                        continue
+                    case "increment":
+                        if let valVariant = innerDict[Variant("value")], let intVal = Int(valVariant) {
+                            result[keyStr] = FieldValue.increment(Int64(intVal))
+                        }
+                        continue
+                    case "arrayUnion":
+                        if let elemVariant = innerDict[Variant("elements")], let elements = GArray(elemVariant) {
+                            result[keyStr] = FieldValue.arrayUnion(gdArrayToSwift(elements))
+                        }
+                        continue
+                    case "arrayRemove":
+                        if let elemVariant = innerDict[Variant("elements")], let elements = GArray(elemVariant) {
+                            result[keyStr] = FieldValue.arrayRemove(gdArrayToSwift(elements))
+                        }
+                        continue
+                    default:
+                        break
+                    }
+                }
+            }
+
             result[keyStr] = variantToSwift(value)
         }
         return result

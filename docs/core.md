@@ -15,6 +15,7 @@ When the plugin is enabled, the `FirebaseIOS` autoload runs this sequence in `_r
 1. **Core** — `FirebaseCorePlugin.initialize()` loads `GoogleService-Info.plist` and calls `FirebaseApp.configure()`
 2. **Auth** — `FirebaseAuthPlugin` is instantiated and its signals are connected
 3. **Firestore** — `FirebaseFirestorePlugin` is instantiated, signals are connected, and Firestore is initialized
+4. **Remote Config** — `FirebaseRemoteConfigPlugin` is instantiated and its signals are connected
 
 All of this happens automatically. You do not need to call `initialize()` yourself.
 
@@ -50,9 +51,10 @@ If the file is missing at runtime, `firebase_error` will be emitted with an expl
 
 ```
 FirebaseIOS (Autoload)
-├── core   → FirebaseCorePlugin    (FirebaseApp.configure)
-├── auth   → FirebaseAuthPlugin    (Authentication)
-└── firestore → FirebaseFirestorePlugin (Cloud Firestore)
+├── core          → FirebaseCorePlugin          (FirebaseApp.configure)
+├── auth          → FirebaseAuthPlugin          (Authentication)
+├── firestore     → FirebaseFirestorePlugin     (Cloud Firestore)
+└── remote_config → FirebaseRemoteConfigPlugin  (Remote Config)
 ```
 
 Each service plugin is independent — Auth and Firestore are peers, neither depends on the other. They only require that Core has initialized Firebase first, which the autoload guarantees.

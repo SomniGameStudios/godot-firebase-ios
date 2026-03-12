@@ -59,6 +59,29 @@ func _on_get_all_pressed() -> void:
 	var all = FirebaseIOS.remote_config.get_all()
 	_log("all", JSON.stringify(all))
 
+func _on_get_json_pressed() -> void:
+	var key = key_input.text
+	if key.is_empty():
+		_log("error", "Enter a key name first")
+		return
+	var json_val = FirebaseIOS.remote_config.get_json(key)
+	_log("json", "key='%s' json='%s'" % [key, json_val])
+
+func _on_get_source_pressed() -> void:
+	var key = key_input.text
+	if key.is_empty():
+		_log("error", "Enter a key name first")
+		return
+	var source = FirebaseIOS.remote_config.get_value_source(key)
+	var source_names = {0: "static", 1: "default", 2: "remote"}
+	_log("source", "key='%s' source=%s" % [key, source_names.get(source, "unknown")])
+
+func _on_fetch_status_pressed() -> void:
+	var status = FirebaseIOS.remote_config.get_last_fetch_status()
+	var status_names = {0: "no_fetch_yet", 1: "success", 2: "failure", 3: "throttled"}
+	var fetch_time = FirebaseIOS.remote_config.get_last_fetch_time()
+	_log("status", "last_fetch=%s time=%s" % [status_names.get(status, "unknown"), fetch_time])
+
 func _on_listen_pressed() -> void:
 	_log("action", "Listening for config updates...")
 	FirebaseIOS.remote_config.listen_for_updates()

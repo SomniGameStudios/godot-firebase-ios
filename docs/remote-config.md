@@ -167,6 +167,69 @@ FirebaseIOS.remote_config.stop_listening_for_updates()
 
 ---
 
+{: .text-green-100 }
+### get_json(key: String) -> String
+
+Returns the JSON string value for the given key. Returns `""` if not available.
+
+```gdscript
+var json_str = FirebaseIOS.remote_config.get_json("level_config")
+var data = JSON.parse_string(json_str)
+```
+
+---
+
+{: .text-green-100 }
+### get_value_source(key: String) -> int
+
+Returns where the value came from: `0` = static, `1` = default, `2` = remote.
+
+```gdscript
+var source = FirebaseIOS.remote_config.get_value_source("welcome_message")
+match source:
+    0: print("Value is static (no value set)")
+    1: print("Value is from defaults")
+    2: print("Value is from remote")
+```
+
+---
+
+{: .text-green-100 }
+### get_last_fetch_status() -> int
+
+Returns the last fetch status: `0` = no_fetch_yet, `1` = success, `2` = failure, `3` = throttled.
+
+```gdscript
+var status = FirebaseIOS.remote_config.get_last_fetch_status()
+if status == 1:
+    print("Last fetch was successful")
+```
+
+---
+
+{: .text-green-100 }
+### get_last_fetch_time() -> String
+
+Returns the time of the last successful fetch as an ISO 8601 string. Returns `""` if no fetch has completed.
+
+```gdscript
+var fetch_time = FirebaseIOS.remote_config.get_last_fetch_time()
+print("Last fetch: %s" % fetch_time)
+```
+
+---
+
+{: .text-green-100 }
+### set_fetch_timeout(seconds: int)
+
+Sets the fetch timeout in seconds. If a fetch does not complete within this time, it will fail.
+
+```gdscript
+FirebaseIOS.remote_config.set_fetch_timeout(10)
+```
+
+---
+
 ## Example Usage
 
 ```gdscript
