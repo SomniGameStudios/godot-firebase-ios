@@ -5,11 +5,11 @@ import FirebaseFirestore
 @Godot
 class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     // Signals — match GodotFirebaseAndroid Firestore API
-    @Signal("status", "doc_id", "data") var write_task_completed: SignalWithArguments<Bool, String, GDictionary>
-    @Signal("status", "doc_id", "data") var get_task_completed: SignalWithArguments<Bool, String, GDictionary>
-    @Signal("status", "doc_id") var update_task_completed: SignalWithArguments<Bool, String>
-    @Signal("status", "doc_id") var delete_task_completed: SignalWithArguments<Bool, String>
-    @Signal("status", "doc_id", "data") var document_changed: SignalWithArguments<Bool, String, GDictionary>
+    @Signal("result") var write_task_completed: SignalWithArguments<GDictionary>
+    @Signal("result") var get_task_completed: SignalWithArguments<GDictionary>
+    @Signal("result") var update_task_completed: SignalWithArguments<GDictionary>
+    @Signal("result") var delete_task_completed: SignalWithArguments<GDictionary>
+    @Signal("document_path", "data") var document_changed: SignalWithArguments<String, GDictionary>
 
     private var db: Firestore?
     private var listeners: [String: ListenerRegistration] = [:]
@@ -37,7 +37,7 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     @Callable
     func add_document(collection: String, data: GDictionary) {
         guard let db else {
-            Task { @MainActor in self.write_task_completed.emit(false, "", GDictionary()) }
+            Task { @MainActor in self.write_task_completed.emit(self.buildResult(status: false, docID: "", error: "Firestore not initialized")) }
             return
         }
         let swiftData = gdDictToSwift(data)
@@ -45,12 +45,12 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
         ref = db.collection(collection).addDocument(data: swiftData) { [weak self] error in
             guard let self else { return }
             Task { @MainActor in
-                if error != nil {
-                    self.write_task_completed.emit(false, "", GDictionary())
+                if let error {
+                    self.write_task_completed.emit(self.buildResult(status: false, docID: "", error: error.localizedDescription))
                     return
                 }
                 let docID = ref?.documentID ?? ""
-                self.write_task_completed.emit(true, docID, data)
+                self.write_task_completed.emit(self.buildResult(status: true, docID: docID, data: data))
             }
         }
     }
@@ -60,18 +60,18 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     @Callable
     func set_document(collection: String, documentId: String, data: GDictionary, merge: Bool) {
         guard let db else {
-            Task { @MainActor in self.write_task_completed.emit(false, documentId, GDictionary()) }
+            Task { @MainActor in self.write_task_completed.emit(self.buildResult(status: false, docID: documentId, error: "Firestore not initialized")) }
             return
         }
         let swiftData = gdDictToSwift(data)
         db.collection(collection).document(documentId).setData(swiftData, merge: merge) { [weak self] error in
             guard let self else { return }
             Task { @MainActor in
-                if error != nil {
-                    self.write_task_completed.emit(false, documentId, GDictionary())
+                if let error {
+                    self.write_task_completed.emit(self.buildResult(status: false, docID: documentId, error: error.localizedDescription))
                     return
                 }
-                self.write_task_completed.emit(true, documentId, data)
+                self.write_task_completed.emit(self.buildResult(status: true, docID: documentId, data: data))
             }
         }
     }
@@ -81,18 +81,18 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     @Callable
     func get_document(collection: String, documentId: String) {
         guard let db else {
-            Task { @MainActor in self.get_task_completed.emit(false, documentId, GDictionary()) }
+            Task { @MainActor in self.get_task_completed.emit(self.buildResult(status: false, docID: documentId, error: "Firestore not initialized")) }
             return
         }
         db.collection(collection).document(documentId).getDocument { [weak self] snapshot, error in
             guard let self else { return }
             Task { @MainActor in
-                if error != nil {
-                    self.get_task_completed.emit(false, documentId, GDictionary())
+                if let error {
+                    self.get_task_completed.emit(self.buildResult(status: false, docID: documentId, error: error.localizedDescription))
                     return
                 }
                 let data = self.snapshotToGDDict(snapshot)
-                self.get_task_completed.emit(true, documentId, data)
+                self.get_task_completed.emit(self.buildResult(status: true, docID: documentId, data: data))
             }
         }
     }
@@ -102,23 +102,23 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     @Callable
     func get_documents_in_collection(collection: String) {
         guard let db else {
-            Task { @MainActor in self.get_task_completed.emit(false, "", GDictionary()) }
+            Task { @MainActor in self.get_task_completed.emit(self.buildResult(status: false, docID: "", error: "Firestore not initialized")) }
             return
         }
         db.collection(collection).getDocuments { [weak self] querySnapshot, error in
             guard let self else { return }
             Task { @MainActor in
-                if error != nil {
-                    self.get_task_completed.emit(false, "", GDictionary())
+                if let error {
+                    self.get_task_completed.emit(self.buildResult(status: false, docID: "", error: error.localizedDescription))
                     return
                 }
                 guard let documents = querySnapshot?.documents else {
-                    self.get_task_completed.emit(true, "", GDictionary())
+                    self.get_task_completed.emit(self.buildResult(status: true, docID: ""))
                     return
                 }
                 for doc in documents {
                     let data = self.docDataToGDDict(doc.data())
-                    self.get_task_completed.emit(true, doc.documentID, data)
+                    self.get_task_completed.emit(self.buildResult(status: true, docID: doc.documentID, data: data))
                 }
             }
         }
@@ -129,18 +129,18 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     @Callable
     func update_document(collection: String, documentId: String, data: GDictionary) {
         guard let db else {
-            Task { @MainActor in self.update_task_completed.emit(false, documentId) }
+            Task { @MainActor in self.update_task_completed.emit(self.buildResult(status: false, docID: documentId, error: "Firestore not initialized")) }
             return
         }
         let swiftData = gdDictToSwift(data)
         db.collection(collection).document(documentId).updateData(swiftData) { [weak self] error in
             guard let self else { return }
             Task { @MainActor in
-                if error != nil {
-                    self.update_task_completed.emit(false, documentId)
+                if let error {
+                    self.update_task_completed.emit(self.buildResult(status: false, docID: documentId, error: error.localizedDescription))
                     return
                 }
-                self.update_task_completed.emit(true, documentId)
+                self.update_task_completed.emit(self.buildResult(status: true, docID: documentId))
             }
         }
     }
@@ -150,17 +150,17 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     @Callable
     func delete_document(collection: String, documentId: String) {
         guard let db else {
-            Task { @MainActor in self.delete_task_completed.emit(false, documentId) }
+            Task { @MainActor in self.delete_task_completed.emit(self.buildResult(status: false, docID: documentId, error: "Firestore not initialized")) }
             return
         }
         db.collection(collection).document(documentId).delete { [weak self] error in
             guard let self else { return }
             Task { @MainActor in
-                if error != nil {
-                    self.delete_task_completed.emit(false, documentId)
+                if let error {
+                    self.delete_task_completed.emit(self.buildResult(status: false, docID: documentId, error: error.localizedDescription))
                     return
                 }
-                self.delete_task_completed.emit(true, documentId)
+                self.delete_task_completed.emit(self.buildResult(status: true, docID: documentId))
             }
         }
     }
@@ -170,7 +170,7 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     @Callable
     func listen_to_document(documentPath: String) {
         guard let db else {
-            Task { @MainActor in self.document_changed.emit(false, documentPath, GDictionary()) }
+            Task { @MainActor in self.document_changed.emit(documentPath, GDictionary()) }
             return
         }
         if listeners[documentPath] != nil { return }
@@ -178,12 +178,11 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             guard let self else { return }
             Task { @MainActor in
                 if error != nil {
-                    self.document_changed.emit(false, documentPath, GDictionary())
+                    self.document_changed.emit(documentPath, GDictionary())
                     return
                 }
                 let data = self.snapshotToGDDict(snapshot)
-                let docID = snapshot?.documentID ?? documentPath
-                self.document_changed.emit(true, docID, data)
+                self.document_changed.emit(documentPath, data)
             }
         }
         listeners[documentPath] = registration
@@ -193,6 +192,17 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     func stop_listening_to_document(documentPath: String) {
         listeners[documentPath]?.remove()
         listeners.removeValue(forKey: documentPath)
+    }
+
+    // MARK: - Result Dictionary Builder
+
+    private func buildResult(status: Bool, docID: String, data: GDictionary? = nil, error: String? = nil) -> GDictionary {
+        var result = GDictionary()
+        result[Variant("status")] = Variant(status)
+        result[Variant("docID")] = Variant(docID)
+        if let data { result[Variant("data")] = Variant(data) }
+        if let error { result[Variant("error")] = Variant(error) }
+        return result
     }
 
     // MARK: - Data Conversion: GDictionary → Swift

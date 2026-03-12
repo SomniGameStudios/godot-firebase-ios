@@ -1,10 +1,10 @@
 extends Node
 
-signal write_task_completed(status: bool, doc_id: String, data: Dictionary)
-signal get_task_completed(status: bool, doc_id: String, data: Dictionary)
-signal update_task_completed(status: bool, doc_id: String)
-signal delete_task_completed(status: bool, doc_id: String)
-signal document_changed(status: bool, doc_id: String, data: Dictionary)
+signal write_task_completed(result: Dictionary)
+signal get_task_completed(result: Dictionary)
+signal update_task_completed(result: Dictionary)
+signal delete_task_completed(result: Dictionary)
+signal document_changed(document_path: String, data: Dictionary)
 
 var _plugin: Object
 
