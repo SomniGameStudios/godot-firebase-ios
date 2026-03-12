@@ -15,7 +15,7 @@ This avoids duplicating logic in your game scenes — they just call `FirebaseWr
 - [GodotFirebaseiOS](https://github.com/SomniGameStudios/godot-firebase-ios) — iOS plugin
 - [GodotFirebaseAndroid](https://github.com/syntaxerror247/GodotFirebaseAndroid) — Android plugin
 
-Both plugins expose a consistent API with the same signals and method names for Auth, Firestore, and Remote Config, so the wrapper is thin.
+Both plugins expose a consistent API with the same signals and method names for Auth, Firestore, Remote Config, and Analytics, so the wrapper is thin.
 
 ## FirebaseWrapper Autoload
 
@@ -61,6 +61,15 @@ var remote_config:
                 return Firebase.remote_config
         return null
 
+var analytics:
+    get:
+        match _platform:
+            Platform.IOS:
+                return FirebaseIOS.analytics
+            Platform.ANDROID:
+                return Firebase.analytics
+        return null
+
 func _ready() -> void:
     if ClassDB.class_exists(&"FirebaseCorePlugin"):
         _platform = Platform.IOS
@@ -101,5 +110,5 @@ func _on_get_document_pressed() -> void:
 
 - Both `FirebaseIOS` and `Firebase` (Android) autoloads must be enabled in your project.
 - Apple Sign-In is iOS only.
-- Remote Config APIs are consistent across both platforms.
+- Analytics and Remote Config APIs are consistent across both platforms.
 - Each plugin is maintained independently — check their repos for the latest API.

@@ -6,7 +6,8 @@ import SwiftGodotRuntime
         FirebaseCorePlugin.self,
         FirebaseAuthPlugin.self,
         FirebaseFirestorePlugin.self,
-        FirebaseRemoteConfigPlugin.self
+        FirebaseRemoteConfigPlugin.self,
+        FirebaseAnalyticsPlugin.self
     ],
     registerDocs: false
 )

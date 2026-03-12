@@ -1,0 +1,134 @@
+[gd_scene load_steps=2 format=3 uid="uid://danalytics_scene"]
+
+[ext_resource type="Script" path="res://scenes/analytics.gd" id="1_analytics"]
+
+[node name="Analytics" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_analytics")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.133, 0.133, 0.133, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 28
+text = "< Back"
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Analytics"
+horizontal_alignment = 1
+
+[node name="HSeparator1" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="LogEvent" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Log Custom Event"
+
+[node name="LogPurchase" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Log Purchase Event"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="SetUserId" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Set User ID"
+
+[node name="SetUserProperty" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Set User Property"
+
+[node name="SetDefaultParams" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Set Default Params"
+
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="GetInstanceId" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Get Instance ID"
+
+[node name="ResetAnalytics" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Reset Analytics"
+
+[node name="ToggleCollection" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+theme_override_font_sizes/font_size = 24
+text = "Toggle Collection"
+
+[node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ClearOutput" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+theme_override_font_sizes/font_size = 22
+text = "Clear Output"
+
+[node name="OutputPanel" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 20
+text = ""
+scroll_following = true
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/LogEvent" to="." method="_on_log_event_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/LogPurchase" to="." method="_on_log_purchase_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SetUserId" to="." method="_on_set_user_id_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SetUserProperty" to="." method="_on_set_user_property_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SetDefaultParams" to="." method="_on_set_default_params_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/GetInstanceId" to="." method="_on_get_instance_id_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ResetAnalytics" to="." method="_on_reset_analytics_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ToggleCollection" to="." method="_on_toggle_collection_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ClearOutput" to="." method="_on_clear_output_pressed"]
