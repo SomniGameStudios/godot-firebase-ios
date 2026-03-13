@@ -467,6 +467,8 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                 }
                 if let refreshedUser = Auth.auth().currentUser {
                     self.auth_success.emit(self.userToDict(refreshedUser))
+                } else {
+                    self.auth_failure.emit("User became nil after reload")
                 }
             }
         }
@@ -492,6 +494,8 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                 }
                 if let updatedUser {
                     self.auth_success.emit(self.userToDict(updatedUser))
+                } else {
+                    self.auth_failure.emit("User became nil after unlinking provider")
                 }
             }
         }
@@ -518,6 +522,8 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                 }
                 if let user = result?.user {
                     self.auth_success.emit(self.userToDict(user))
+                } else {
+                    self.auth_failure.emit("User became nil after reauthentication")
                 }
             }
         }
@@ -645,9 +651,13 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         var metadata = GDictionary()
         if let creationDate = user.metadata.creationDate {
             metadata[Variant("creationDate")] = Variant(formatter.string(from: creationDate))
+        } else {
+            metadata[Variant("creationDate")] = Variant("")
         }
         if let lastSignInDate = user.metadata.lastSignInDate {
             metadata[Variant("lastSignInDate")] = Variant(formatter.string(from: lastSignInDate))
+        } else {
+            metadata[Variant("lastSignInDate")] = Variant("")
         }
         dict[Variant("metadata")] = Variant(metadata)
 
