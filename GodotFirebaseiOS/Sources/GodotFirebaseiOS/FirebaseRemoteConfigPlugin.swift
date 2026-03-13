@@ -136,7 +136,10 @@ class FirebaseRemoteConfigPlugin: RefCounted, @unchecked Sendable {
 
     @Callable
     func get_json(key: String) -> String {
-        return remoteConfig?.configValue(forKey: key).jsonValue as? String ?? ""
+        guard let jsonObject = remoteConfig?.configValue(forKey: key).jsonValue else { return "" }
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject),
+              let jsonString = String(data: jsonData, encoding: .utf8) else { return "" }
+        return jsonString
     }
 
     @Callable
