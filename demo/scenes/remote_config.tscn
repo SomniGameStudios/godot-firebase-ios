@@ -1,8 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://cremote_config_scene"]
+[gd_scene format=3 uid="uid://car1hbgq0uimd"]
 
-[ext_resource type="Script" path="res://scenes/remote_config.gd" id="1_remote_config"]
+[ext_resource type="Script" uid="uid://cujj2vtn8uo3r" path="res://scenes/remote_config.gd" id="1_remote_config"]
+[ext_resource type="Script" uid="uid://dob7x2ghdnqc8" path="res://scenes/safe_area_container.gd" id="2_bdxgj"]
 
-[node name="RemoteConfig" type="Control"]
+[node name="RemoteConfig" type="Control" unique_id=416913516]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_remote_config")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=979514531]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +21,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.133, 0.133, 0.133, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=168139287]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -32,142 +33,155 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 40
 theme_override_constants/margin_bottom = 20
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1170032621]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="SafeAreaContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=1108779147]
 layout_mode = 2
+script = ExtResource("2_bdxgj")
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer/SafeAreaContainer" unique_id=2092695547]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "< Back"
 
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=2112499388]
 layout_mode = 2
 theme_override_font_sizes/font_size = 36
 text = "Remote Config"
 horizontal_alignment = 1
 
-[node name="HSeparator1" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator1" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=966650551]
 layout_mode = 2
 
-[node name="SetDefaults" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer" unique_id=68799564]
+custom_minimum_size = Vector2(0, 650)
 layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer" unique_id=1106302368]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="SetDefaults" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=2140345546]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Set Defaults"
 
-[node name="SetDevInterval" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="SetDevInterval" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1880125185]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Set Dev Interval (0s)"
 
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1737455675]
 layout_mode = 2
 
-[node name="Fetch" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="Fetch" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1952072501]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Fetch"
 
-[node name="Activate" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="Activate" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=961630287]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Activate"
 
-[node name="FetchAndActivate" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="FetchAndActivate" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1386338057]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Fetch & Activate"
 
-[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1042795909]
 layout_mode = 2
 
-[node name="KeyInput" type="LineEdit" parent="MarginContainer/VBoxContainer"]
+[node name="KeyInput" type="LineEdit" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1899694104]
 unique_name_in_owner = true
-layout_mode = 2
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
-placeholder_text = "Config key name"
 text = "welcome_message"
+placeholder_text = "Config key name"
 
-[node name="GetValue" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="GetValue" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=304336034]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Get Value"
 
-[node name="GetAll" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="GetAll" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=550263016]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Get All Values"
 
-[node name="GetJson" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="GetJson" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=2139999440]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Get JSON Value"
 
-[node name="GetSource" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="GetSource" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=2136784989]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Get Value Source"
 
-[node name="FetchStatus" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="FetchStatus" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1103087035]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Fetch Status"
 
-[node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=169695749]
 layout_mode = 2
 
-[node name="Listen" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="Listen" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1592277037]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Listen for Updates"
 
-[node name="StopListen" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="StopListen" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=40790976]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Stop Listening"
 
-[node name="HSeparator5" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator5" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=202472060]
 layout_mode = 2
 
-[node name="ClearOutput" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="ClearOutput" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1754076274]
 custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Clear Output"
 
-[node name="OutputPanel" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
+[node name="OutputPanel" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=384698153]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 250)
 layout_mode = 2
-size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 20
-text = ""
 scroll_following = true
 
-[connection signal="pressed" from="MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SetDefaults" to="." method="_on_set_defaults_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SetDevInterval" to="." method="_on_set_dev_interval_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Fetch" to="." method="_on_fetch_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Activate" to="." method="_on_activate_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/FetchAndActivate" to="." method="_on_fetch_and_activate_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GetValue" to="." method="_on_get_value_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GetAll" to="." method="_on_get_all_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GetJson" to="." method="_on_get_json_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GetSource" to="." method="_on_get_source_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/FetchStatus" to="." method="_on_fetch_status_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Listen" to="." method="_on_listen_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/StopListen" to="." method="_on_stop_listen_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SafeAreaContainer/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/SetDefaults" to="." method="_on_set_defaults_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/SetDevInterval" to="." method="_on_set_dev_interval_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/Fetch" to="." method="_on_fetch_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/Activate" to="." method="_on_activate_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/FetchAndActivate" to="." method="_on_fetch_and_activate_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/GetValue" to="." method="_on_get_value_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/GetAll" to="." method="_on_get_all_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/GetJson" to="." method="_on_get_json_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/GetSource" to="." method="_on_get_source_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/FetchStatus" to="." method="_on_fetch_status_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/Listen" to="." method="_on_listen_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/StopListen" to="." method="_on_stop_listen_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/ClearOutput" to="." method="_on_clear_output_pressed"]

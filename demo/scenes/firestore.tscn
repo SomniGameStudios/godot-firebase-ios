@@ -79,6 +79,7 @@ size_flags_vertical = 3
 script = ExtResource("2_e3ux7")
 
 [node name="ScrollVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer" unique_id=327749908]
+custom_minimum_size = Vector2(0, 4)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
@@ -205,7 +206,7 @@ text = "Clear Output"
 
 [node name="OutputPanel" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=48502227]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 200)
+custom_minimum_size = Vector2(0, 250)
 layout_mode = 2
 theme_override_font_sizes/normal_font_size = 20
 scroll_following = true
