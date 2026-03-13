@@ -48,15 +48,9 @@ fi
 
 echo "📦 Updating addon folder..."
 
-# Clean up old files
-rm -rf "$ADDON_PATH/GodotFirebaseiOS.framework" "$ADDON_PATH/stubs"
-
-# Copy the fresh iOS Framework
+# Clean up old framework and copy the fresh one
+rm -rf "$ADDON_PATH/GodotFirebaseiOS.framework"
 cp -r "$FRAMEWORK_SOURCE" "$ADDON_PATH/"
-
-# Generate GDExtension stubs for unsupported platforms (macOS Editor, Windows, Android)
-# This prevents loader errors in the Godot console.
-./scripts/generate_stubs.sh "$ADDON_PATH/stubs"
 
 
 echo "✅ Done! Addon updated at $ADDON_PATH"
