@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cujj2vtn8uo3r" path="res://scenes/remote_config.gd" id="1_remote_config"]
 [ext_resource type="Script" uid="uid://dob7x2ghdnqc8" path="res://scenes/safe_area_container.gd" id="2_bdxgj"]
+[ext_resource type="Script" uid="uid://bdka7kj61v58b" path="res://scenes/scroll_container.gd" id="3_fonbq"]
 
 [node name="RemoteConfig" type="Control" unique_id=416913516]
 layout_mode = 3
@@ -60,6 +61,7 @@ layout_mode = 2
 custom_minimum_size = Vector2(0, 650)
 layout_mode = 2
 size_flags_vertical = 3
+script = ExtResource("3_fonbq")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer" unique_id=1106302368]
 layout_mode = 2
