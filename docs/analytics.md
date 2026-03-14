@@ -8,6 +8,8 @@ layout: default
 
 Firebase Analytics for iOS via the `FirebaseIOS.analytics` autoload.
 
+> **Official Firebase docs:** [Firebase Analytics](https://firebase.google.com/docs/analytics) · [Get started (iOS)](https://firebase.google.com/docs/analytics/ios/get-started)
+
 Note that Analytics has no signals — all methods are fire-and-forget.
 
 ## Methods
