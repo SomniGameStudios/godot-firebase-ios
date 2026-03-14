@@ -8,6 +8,8 @@ layout: default
 
 Firebase Authentication for iOS via the `FirebaseIOS.auth` autoload.
 
+> **Official Firebase docs:** [Firebase Authentication](https://firebase.google.com/docs/auth) · [Get started (iOS)](https://firebase.google.com/docs/auth/ios/start)
+
 ## Signals
 
 - `auth_success(current_user_data: Dictionary)`

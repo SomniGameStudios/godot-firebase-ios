@@ -16,6 +16,7 @@ When the plugin is enabled, the `FirebaseIOS` autoload runs this sequence in `_r
 2. **Auth** — `FirebaseAuthPlugin` is instantiated and its signals are connected
 3. **Firestore** — `FirebaseFirestorePlugin` is instantiated, signals are connected, and Firestore is initialized
 4. **Remote Config** — `FirebaseRemoteConfigPlugin` is instantiated and its signals are connected
+5. **Analytics** — `FirebaseAnalyticsPlugin` is instantiated (fire-and-forget, no signals)
 
 All of this happens automatically. You do not need to call `initialize()` yourself.
 
@@ -54,7 +55,8 @@ FirebaseIOS (Autoload)
 ├── core          → FirebaseCorePlugin          (FirebaseApp.configure)
 ├── auth          → FirebaseAuthPlugin          (Authentication)
 ├── firestore     → FirebaseFirestorePlugin     (Cloud Firestore)
-└── remote_config → FirebaseRemoteConfigPlugin  (Remote Config)
+├── remote_config → FirebaseRemoteConfigPlugin  (Remote Config)
+└── analytics     → FirebaseAnalyticsPlugin     (Analytics)
 ```
 
 Each service plugin is independent — Auth and Firestore are peers, neither depends on the other. They only require that Core has initialized Firebase first, which the autoload guarantees.

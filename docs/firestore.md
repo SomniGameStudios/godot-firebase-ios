@@ -8,6 +8,8 @@ layout: default
 
 Cloud Firestore for iOS via the `FirebaseIOS.firestore` autoload.
 
+> **Official Firebase docs:** [Cloud Firestore](https://firebase.google.com/docs/firestore) · [Get started (iOS)](https://firebase.google.com/docs/firestore/ios/get-started)
+
 ## Signals
 
 All task signals emit a single `result: Dictionary` with the following keys:

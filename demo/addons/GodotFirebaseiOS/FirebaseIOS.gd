@@ -6,6 +6,7 @@ signal firebase_error(message: String)
 var auth := preload("res://addons/GodotFirebaseiOS/modules/Auth.gd").new()
 var firestore := preload("res://addons/GodotFirebaseiOS/modules/Firestore.gd").new()
 var remote_config := preload("res://addons/GodotFirebaseiOS/modules/RemoteConfig.gd").new()
+var analytics := preload("res://addons/GodotFirebaseiOS/modules/Analytics.gd").new()
 
 func _ready() -> void:
 	if not OS.has_feature("ios"):
@@ -42,3 +43,9 @@ func _ready() -> void:
 		remote_config._plugin = _rc_plugin
 		remote_config._connect_signals()
 		remote_config.initialize()
+
+	# 5. Analytics module
+	if ClassDB.class_exists(&"FirebaseAnalyticsPlugin"):
+		var _analytics_plugin := ClassDB.instantiate(&"FirebaseAnalyticsPlugin")
+		analytics._plugin = _analytics_plugin
+		analytics._connect_signals()

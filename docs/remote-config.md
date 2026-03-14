@@ -8,6 +8,8 @@ layout: default
 
 Firebase Remote Config for iOS via the `FirebaseIOS.remote_config` autoload.
 
+> **Official Firebase docs:** [Firebase Remote Config](https://firebase.google.com/docs/remote-config) · [Get started (iOS)](https://firebase.google.com/docs/remote-config/ios/get-started)
+
 ## Signals
 
 - `fetch_completed(result: Dictionary)`

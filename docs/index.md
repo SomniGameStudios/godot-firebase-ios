@@ -15,6 +15,7 @@ Designed to work alongside [GodotFirebaseAndroid](https://github.com/syntaxerror
 - Authentication (Anonymous, Google, Apple, account linking)
 - Cloud Firestore (CRUD, real-time listeners)
 - Remote Config (fetch, activate, typed getters, real-time updates)
+- Analytics (events, user properties, consent, session management)
 
 ## Setup
 

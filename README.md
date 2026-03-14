@@ -33,6 +33,13 @@ Designed to work alongside [GodotFirebaseAndroid](https://github.com/syntaxerror
 - Real-time config update listener
 - Value source and fetch status introspection
 
+**Analytics**
+- Log custom and predefined events with parameters
+- User properties and user ID
+- Default event parameters
+- Consent management (ad and analytics storage)
+- Session timeout configuration
+
 ---
 
 ## Documentation
