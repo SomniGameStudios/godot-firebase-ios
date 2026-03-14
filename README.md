@@ -54,7 +54,7 @@ Full installation guide, API reference, and examples.
 
 | Tool | Minimum |
 |------|---------|
-| Godot | 4.4+ |
+| Godot | 4.6.1+ |
 | Xcode | 15+ |
 | iOS deployment target | 17+ |
 | macOS (build machine) | 14+ |
