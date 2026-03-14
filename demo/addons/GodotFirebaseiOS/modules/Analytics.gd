@@ -34,9 +34,9 @@ func get_app_instance_id() -> String:
 		return _plugin.get_app_instance_id()
 	return ""
 
-func set_consent(ad_storage: bool, analytics_storage: bool) -> void:
+func set_consent(ad_storage: bool, analytics_storage: bool, ad_user_data: bool = true, ad_personalization: bool = true) -> void:
 	if _plugin:
-		_plugin.set_consent(ad_storage, analytics_storage)
+		_plugin.set_consent(ad_storage, analytics_storage, ad_user_data, ad_personalization)
 
 func set_session_timeout(seconds: int) -> void:
 	if _plugin:

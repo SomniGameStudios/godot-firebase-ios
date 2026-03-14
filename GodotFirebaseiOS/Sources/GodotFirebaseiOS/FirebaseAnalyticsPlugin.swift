@@ -57,10 +57,12 @@ class FirebaseAnalyticsPlugin: RefCounted, @unchecked Sendable {
     // MARK: - Consent
 
     @Callable
-    func set_consent(adStorage: Bool, analyticsStorage: Bool) {
+    func set_consent(adStorage: Bool, analyticsStorage: Bool, adUserData: Bool, adPersonalization: Bool) {
         Analytics.setConsent([
             .adStorage: adStorage ? .granted : .denied,
-            .analyticsStorage: analyticsStorage ? .granted : .denied
+            .analyticsStorage: analyticsStorage ? .granted : .denied,
+            .adUserData: adUserData ? .granted : .denied,
+            .adPersonalization: adPersonalization ? .granted : .denied
         ])
     }
 

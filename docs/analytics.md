@@ -116,15 +116,18 @@ if instance_id != "":
 ---
 
 {: .text-green-100 }
-### set_consent(ad_storage: bool, analytics_storage: bool)
+### set_consent(ad_storage: bool, analytics_storage: bool, ad_user_data: bool = true, ad_personalization: bool = true)
 
-Manages analytics consent for ad and analytics storage. Use this to comply with privacy regulations.
+Manages analytics consent for ad storage, analytics storage, ad user data, and ad personalization. Use this to comply with privacy regulations like GDPR and DMA.
 
 ```gdscript
 # User granted full consent
-FirebaseIOS.analytics.set_consent(true, true)
+FirebaseIOS.analytics.set_consent(true, true, true, true)
 
 # User denied ad tracking but allowed analytics
+FirebaseIOS.analytics.set_consent(false, true, false, false)
+
+# Minimal — only analytics, no ad-related consent
 FirebaseIOS.analytics.set_consent(false, true)
 ```
 
