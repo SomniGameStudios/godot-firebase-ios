@@ -147,6 +147,8 @@ FirebaseIOS.analytics.set_session_timeout(600)
 
 ## Debug Mode
 
+> **Official Firebase docs:** [DebugView](https://firebase.google.com/docs/analytics/debugview)
+
 Firebase Analytics batches events and sends them roughly every hour. To see events in **real-time** during development, enable DebugView:
 
 1. Export your Godot project to iOS

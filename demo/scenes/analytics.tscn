@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://danalytics_scene"]
+[gd_scene load_steps=3 format=3 uid="uid://danalytics_scene"]
 
 [ext_resource type="Script" path="res://scenes/analytics.gd" id="1_analytics"]
+[ext_resource type="Script" uid="uid://dob7x2ghdnqc8" path="res://scenes/safe_area_container.gd" id="2_safearea"]
 
 [node name="Analytics" type="Control"]
 layout_mode = 3
@@ -36,9 +37,13 @@ theme_override_constants/margin_bottom = 20
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="SafeAreaContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+script = ExtResource("2_safearea")
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer/SafeAreaContainer"]
 custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "< Back"
 
@@ -122,7 +127,7 @@ theme_override_font_sizes/normal_font_size = 20
 text = ""
 scroll_following = true
 
-[connection signal="pressed" from="MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SafeAreaContainer/BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/LogEvent" to="." method="_on_log_event_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/LogPurchase" to="." method="_on_log_purchase_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SetUserId" to="." method="_on_set_user_id_pressed"]
