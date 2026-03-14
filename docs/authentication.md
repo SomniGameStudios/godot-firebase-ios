@@ -34,6 +34,33 @@ Firebase Authentication for iOS via the `FirebaseIOS.auth` autoload.
 - `user_deleted(success: bool)`
   Emitted after an attempt to delete the current user.
 
+- `create_user_success(current_user_data: Dictionary)`
+  Emitted when a new email/password user is successfully created.
+
+- `create_user_failure(error_message: String)`
+  Emitted when creating a user fails.
+
+- `password_reset_success(success: bool)`
+  Emitted when a password reset email is sent successfully.
+
+- `password_reset_failure(error_message: String)`
+  Emitted when sending a password reset email fails.
+
+- `auth_state_changed(signed_in: bool, current_user_data: Dictionary)`
+  Emitted when the authentication state changes (user signs in or out).
+
+- `id_token_result(token: String)`
+  Emitted with the user's ID token.
+
+- `id_token_error(error_message: String)`
+  Emitted when retrieving the ID token fails.
+
+- `profile_updated(success: bool)`
+  Emitted when a profile update succeeds.
+
+- `profile_update_failure(error_message: String)`
+  Emitted when a profile update fails.
+
 ## Methods
 
 {: .text-green-100 }
@@ -149,6 +176,9 @@ FirebaseIOS.auth.is_signed_in()
 - `photoURL` — Profile photo URL (empty string if not set)
 - `isAnonymous` — Whether the user is anonymous
 - `providerData` — Array of linked providers, each with `providerId`, `uid`, `email`, `displayName`, `photoURL`
+- `phoneNumber` — Phone number (empty string if not set)
+- `isEmailVerified` — Whether the user's email has been verified
+- `metadata` — Dictionary with `creationDate` and `lastSignInDate` as ISO 8601 strings
 
 ```gdscript
 var user = FirebaseIOS.auth.get_current_user_data()
@@ -167,7 +197,160 @@ FirebaseIOS.auth.use_emulator("localhost", 9099)
 
 ---
 
+{: .text-green-100 }
+### create_user_with_email(email: String, password: String)
+
+Creates a new user with email and password.
+
+**Emits:** `create_user_success` or `create_user_failure`.
+
+```gdscript
+FirebaseIOS.auth.create_user_with_email("user@example.com", "password123")
+```
+
+---
+
+{: .text-green-100 }
+### sign_in_with_email(email: String, password: String)
+
+Signs in with email and password.
+
+**Emits:** `auth_success` or `auth_failure`.
+
+```gdscript
+FirebaseIOS.auth.sign_in_with_email("user@example.com", "password123")
+```
+
+---
+
+{: .text-green-100 }
+### send_password_reset_email(email: String)
+
+Sends a password reset email.
+
+**Emits:** `password_reset_success` or `password_reset_failure`.
+
+```gdscript
+FirebaseIOS.auth.send_password_reset_email("user@example.com")
+```
+
+---
+
+{: .text-green-100 }
+### add_auth_state_listener()
+
+Starts listening for auth state changes.
+
+**Emits:** `auth_state_changed` whenever the user signs in or out.
+
+```gdscript
+FirebaseIOS.auth.add_auth_state_listener()
+```
+
+---
+
+{: .text-green-100 }
+### remove_auth_state_listener()
+
+Stops listening for auth state changes.
+
+```gdscript
+FirebaseIOS.auth.remove_auth_state_listener()
+```
+
+---
+
+{: .text-green-100 }
+### get_id_token(force_refresh: bool = false)
+
+Retrieves the current user's Firebase ID token.
+
+**Emits:** `id_token_result` or `id_token_error`.
+
+```gdscript
+FirebaseIOS.auth.get_id_token(false)
+```
+
+---
+
+{: .text-green-100 }
+### update_profile(display_name: String, photo_url: String = "")
+
+Updates the current user's display name and/or photo URL. Only non-empty values are applied.
+
+**Emits:** `profile_updated` or `profile_update_failure`.
+
+```gdscript
+FirebaseIOS.auth.update_profile("Alice", "")
+```
+
+---
+
+{: .text-green-100 }
+### update_password(new_password: String)
+
+Updates the current user's password. May require recent reauthentication.
+
+**Emits:** `profile_updated` or `auth_failure`.
+
+```gdscript
+FirebaseIOS.auth.update_password("newSecurePassword")
+```
+
+---
+
+{: .text-green-100 }
+### send_email_verification()
+
+Sends an email verification to the current user.
+
+**Emits:** `profile_updated` or `auth_failure`.
+
+```gdscript
+FirebaseIOS.auth.send_email_verification()
+```
+
+---
+
+{: .text-green-100 }
+### reload_user()
+
+Reloads the current user's data from the server.
+
+**Emits:** `auth_success` with refreshed data, or `auth_failure`.
+
+```gdscript
+FirebaseIOS.auth.reload_user()
+```
+
+---
+
+{: .text-green-100 }
+### unlink_provider(provider_id: String)
+
+Unlinks a provider from the current user.
+
+**Emits:** `auth_success` or `auth_failure`.
+
+```gdscript
+FirebaseIOS.auth.unlink_provider("google.com")
+```
+
+---
+
+{: .text-green-100 }
+### reauthenticate_with_email(email: String, password: String)
+
+Reauthenticates the current user with email credentials. Required before sensitive operations.
+
+**Emits:** `auth_success` or `auth_failure`.
+
+```gdscript
+FirebaseIOS.auth.reauthenticate_with_email("user@example.com", "password123")
+```
+
+---
+
 ## Known Limitations
 
 - Google Sign-In requires a physical iOS device (arm64). The iOS Simulator is not supported.
-- Email/Password authentication is not yet implemented on iOS.

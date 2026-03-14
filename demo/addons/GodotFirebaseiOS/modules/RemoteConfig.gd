@@ -69,3 +69,29 @@ func listen_for_updates() -> void:
 func stop_listening_for_updates() -> void:
 	if _plugin:
 		_plugin.stop_listening_for_updates()
+
+# Additional getters
+
+func get_json(key: String) -> String:
+	if _plugin:
+		return _plugin.get_json(key)
+	return ""
+
+func get_value_source(key: String) -> int:
+	if _plugin:
+		return _plugin.get_value_source(key)
+	return 0
+
+func get_last_fetch_status() -> int:
+	if _plugin:
+		return _plugin.get_last_fetch_status()
+	return -1
+
+func get_last_fetch_time() -> String:
+	if _plugin:
+		return _plugin.get_last_fetch_time()
+	return ""
+
+func set_fetch_timeout(seconds: int) -> void:
+	if _plugin:
+		_plugin.set_fetch_timeout(seconds)

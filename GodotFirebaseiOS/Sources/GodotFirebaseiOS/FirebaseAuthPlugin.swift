@@ -20,7 +20,25 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
     @Signal("current_user_data") var link_with_apple_success: SignalWithArguments<GDictionary>
     @Signal("error_message") var link_with_apple_failure: SignalWithArguments<String>
 
+    // Email/password signals
+    @Signal("current_user_data") var create_user_success: SignalWithArguments<GDictionary>
+    @Signal("error_message") var create_user_failure: SignalWithArguments<String>
+    @Signal("success") var password_reset_success: SignalWithArguments<Bool>
+    @Signal("error_message") var password_reset_failure: SignalWithArguments<String>
+
+    // Auth state listener signal
+    @Signal("signed_in", "current_user_data") var auth_state_changed: SignalWithArguments<Bool, GDictionary>
+
+    // ID token signals
+    @Signal("token") var id_token_result: SignalWithArguments<String>
+    @Signal("error_message") var id_token_error: SignalWithArguments<String>
+
+    // Profile update signals
+    @Signal("success") var profile_updated: SignalWithArguments<Bool>
+    @Signal("error_message") var profile_update_failure: SignalWithArguments<String>
+
     private var appleSignInHelper: AppleSignInHelper?
+    private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     // MARK: - Emulator
 
@@ -58,6 +76,67 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                 }
                 guard let user = result?.user else { return }
                 self.auth_success.emit(self.userToDict(user))
+            }
+        }
+    }
+
+    // MARK: - Email/Password Auth
+
+    @Callable
+    func create_user_with_email(email: String, password: String) {
+        guard FirebaseApp.app() != nil else {
+            create_user_failure.emit("Firebase not initialized")
+            return
+        }
+        Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.create_user_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                guard let user = result?.user else { return }
+                self.create_user_success.emit(self.userToDict(user))
+            }
+        }
+    }
+
+    @Callable
+    func sign_in_with_email(email: String, password: String) {
+        guard FirebaseApp.app() != nil else {
+            auth_failure.emit("Firebase not initialized")
+            return
+        }
+        Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                guard let user = result?.user else { return }
+                self.auth_success.emit(self.userToDict(user))
+            }
+        }
+    }
+
+    @Callable
+    func send_password_reset_email(email: String) {
+        guard FirebaseApp.app() != nil else {
+            password_reset_failure.emit("Firebase not initialized")
+            return
+        }
+        Auth.auth().sendPasswordReset(withEmail: email) { [weak self] error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.password_reset_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                self.password_reset_success.emit(true)
             }
         }
     }
@@ -237,6 +316,219 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         return userToDict(user)
     }
 
+    // MARK: - Auth State Listener
+
+    @Callable
+    func add_auth_state_listener() {
+        guard FirebaseApp.app() != nil else {
+            auth_failure.emit("Firebase not initialized")
+            return
+        }
+        if authStateHandle != nil { return }
+        authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            guard let self else { return }
+            Task { @MainActor in
+                if let user {
+                    self.auth_state_changed.emit(true, self.userToDict(user))
+                } else {
+                    self.auth_state_changed.emit(false, GDictionary())
+                }
+            }
+        }
+    }
+
+    @Callable
+    func remove_auth_state_listener() {
+        guard let handle = authStateHandle else { return }
+        Auth.auth().removeStateDidChangeListener(handle)
+        authStateHandle = nil
+    }
+
+    // MARK: - ID Token
+
+    @Callable
+    func get_id_token(forceRefresh: Bool) {
+        guard FirebaseApp.app() != nil else {
+            id_token_error.emit("Firebase not initialized")
+            return
+        }
+        guard let user = Auth.auth().currentUser else {
+            id_token_error.emit("No user signed in")
+            return
+        }
+        user.getIDTokenForcingRefresh(forceRefresh) { [weak self] token, error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.id_token_error.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                self.id_token_result.emit(token ?? "")
+            }
+        }
+    }
+
+    // MARK: - Profile Management
+
+    @Callable
+    func update_profile(displayName: String, photoUrl: String) {
+        guard FirebaseApp.app() != nil else {
+            profile_update_failure.emit("Firebase not initialized")
+            return
+        }
+        guard let user = Auth.auth().currentUser else {
+            profile_update_failure.emit("No user signed in")
+            return
+        }
+        let changeRequest = user.createProfileChangeRequest()
+        if !displayName.isEmpty {
+            changeRequest.displayName = displayName
+        }
+        if !photoUrl.isEmpty {
+            changeRequest.photoURL = URL(string: photoUrl)
+        }
+        changeRequest.commitChanges { [weak self] error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.profile_update_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                self.profile_updated.emit(true)
+            }
+        }
+    }
+
+    @Callable
+    func update_password(newPassword: String) {
+        guard FirebaseApp.app() != nil else {
+            auth_failure.emit("Firebase not initialized")
+            return
+        }
+        guard let user = Auth.auth().currentUser else {
+            auth_failure.emit("No user signed in")
+            return
+        }
+        user.updatePassword(to: newPassword) { [weak self] error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                self.profile_updated.emit(true)
+            }
+        }
+    }
+
+    @Callable
+    func send_email_verification() {
+        guard FirebaseApp.app() != nil else {
+            auth_failure.emit("Firebase not initialized")
+            return
+        }
+        guard let user = Auth.auth().currentUser else {
+            auth_failure.emit("No user signed in")
+            return
+        }
+        user.sendEmailVerification { [weak self] error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                self.profile_updated.emit(true)
+            }
+        }
+    }
+
+    @Callable
+    func reload_user() {
+        guard FirebaseApp.app() != nil else {
+            auth_failure.emit("Firebase not initialized")
+            return
+        }
+        guard let user = Auth.auth().currentUser else {
+            auth_failure.emit("No user signed in")
+            return
+        }
+        user.reload { [weak self] error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                if let refreshedUser = Auth.auth().currentUser {
+                    self.auth_success.emit(self.userToDict(refreshedUser))
+                } else {
+                    self.auth_failure.emit("User became nil after reload")
+                }
+            }
+        }
+    }
+
+    @Callable
+    func unlink_provider(providerId: String) {
+        guard FirebaseApp.app() != nil else {
+            auth_failure.emit("Firebase not initialized")
+            return
+        }
+        guard let user = Auth.auth().currentUser else {
+            auth_failure.emit("No user signed in")
+            return
+        }
+        user.unlink(fromProvider: providerId) { [weak self] updatedUser, error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                if let updatedUser {
+                    self.auth_success.emit(self.userToDict(updatedUser))
+                } else {
+                    self.auth_failure.emit("User became nil after unlinking provider")
+                }
+            }
+        }
+    }
+
+    @Callable
+    func reauthenticate_with_email(email: String, password: String) {
+        guard FirebaseApp.app() != nil else {
+            auth_failure.emit("Firebase not initialized")
+            return
+        }
+        guard let user = Auth.auth().currentUser else {
+            auth_failure.emit("No user signed in")
+            return
+        }
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        user.reauthenticate(with: credential) { [weak self] result, error in
+            guard let self else { return }
+            Task { @MainActor in
+                if let error {
+                    let nsError = error as NSError
+                    self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
+                    return
+                }
+                if let user = result?.user {
+                    self.auth_success.emit(self.userToDict(user))
+                } else {
+                    self.auth_failure.emit("User became nil after reauthentication")
+                }
+            }
+        }
+    }
+
     // MARK: - Private Helpers
 
     private func performGoogleSignIn(completion: @escaping (AuthCredential?, String?) -> Void) {
@@ -350,7 +642,25 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         dict[Variant("email")] = Variant(user.email ?? "")
         dict[Variant("displayName")] = Variant(user.displayName ?? "")
         dict[Variant("photoURL")] = Variant(user.photoURL?.absoluteString ?? "")
+        dict[Variant("phoneNumber")] = Variant(user.phoneNumber ?? "")
         dict[Variant("isAnonymous")] = Variant(user.isAnonymous)
+        dict[Variant("isEmailVerified")] = Variant(user.isEmailVerified)
+
+        // Metadata
+        let formatter = ISO8601DateFormatter()
+        var metadata = GDictionary()
+        if let creationDate = user.metadata.creationDate {
+            metadata[Variant("creationDate")] = Variant(formatter.string(from: creationDate))
+        } else {
+            metadata[Variant("creationDate")] = Variant("")
+        }
+        if let lastSignInDate = user.metadata.lastSignInDate {
+            metadata[Variant("lastSignInDate")] = Variant(formatter.string(from: lastSignInDate))
+        } else {
+            metadata[Variant("lastSignInDate")] = Variant("")
+        }
+        dict[Variant("metadata")] = Variant(metadata)
+
         var providers = GArray()
         for provider in user.providerData {
             var p = GDictionary()

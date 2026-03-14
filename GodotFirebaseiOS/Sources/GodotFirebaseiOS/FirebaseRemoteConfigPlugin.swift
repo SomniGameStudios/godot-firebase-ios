@@ -134,6 +134,62 @@ class FirebaseRemoteConfigPlugin: RefCounted, @unchecked Sendable {
         return dict
     }
 
+    @Callable
+    func get_json(key: String) -> String {
+        guard let jsonObject = remoteConfig?.configValue(forKey: key).jsonValue else { return "" }
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject),
+              let jsonString = String(data: jsonData, encoding: .utf8) else { return "" }
+        return jsonString
+    }
+
+    @Callable
+    func get_value_source(key: String) -> Int {
+        guard let remoteConfig else { return 0 }
+        let source = remoteConfig.configValue(forKey: key).source
+        switch source {
+        case .static:
+            return 0
+        case .default:
+            return 1
+        case .remote:
+            return 2
+        @unknown default:
+            return 0
+        }
+    }
+
+    @Callable
+    func get_last_fetch_status() -> Int {
+        guard let remoteConfig else { return -1 }
+        switch remoteConfig.lastFetchStatus {
+        case .noFetchYet:
+            return 0
+        case .success:
+            return 1
+        case .failure:
+            return 2
+        case .throttled:
+            return 3
+        @unknown default:
+            return -1
+        }
+    }
+
+    @Callable
+    func get_last_fetch_time() -> String {
+        guard let remoteConfig, let fetchTime = remoteConfig.lastFetchTime else { return "" }
+        let formatter = ISO8601DateFormatter()
+        return formatter.string(from: fetchTime)
+    }
+
+    @Callable
+    func set_fetch_timeout(seconds: Int) {
+        guard let remoteConfig else { return }
+        let settings = remoteConfig.configSettings
+        settings.fetchTimeout = TimeInterval(seconds)
+        remoteConfig.configSettings = settings
+    }
+
     // MARK: - Real-time Listeners
 
     @Callable
