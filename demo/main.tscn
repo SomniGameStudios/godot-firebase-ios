@@ -68,6 +68,7 @@ theme_override_font_sizes/font_size = 36
 text = "Analytics"
 
 [node name="ComingSoon" type="Label" parent="MarginContainer/VBoxContainer" unique_id=793478508]
+text = "More services coming soon..."
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/AuthButton" to="." method="_on_auth_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/FirestoreButton" to="." method="_on_firestore_pressed"]
