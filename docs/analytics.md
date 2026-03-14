@@ -145,6 +145,28 @@ FirebaseIOS.analytics.set_session_timeout(600)
 
 ---
 
+## Debug Mode
+
+Firebase Analytics batches events and sends them roughly every hour. To see events in **real-time** during development, enable DebugView:
+
+1. Export your Godot project to iOS
+2. Open the generated `.xcodeproj` in Xcode
+3. Go to **Product → Scheme → Edit Scheme** (or `Cmd+<`)
+4. Select **Run → Arguments**
+5. Under **Arguments Passed On Launch**, add:
+   ```
+   -FIRDebugEnabled
+   ```
+6. Run on a physical iOS device
+
+Then open **Firebase Console → Analytics → DebugView** to see events arriving in real-time as you interact with your app.
+
+To disable debug mode later, remove the argument or replace it with `-FIRDebugDisabled`.
+
+> **Note:** This launch argument is set on the **exported Xcode project**, not during the plugin build. It is a runtime flag that tells the Firebase SDK to send events immediately.
+
+---
+
 ## Example Usage
 
 ```gdscript
