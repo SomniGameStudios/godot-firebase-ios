@@ -353,6 +353,23 @@ FirebaseIOS.auth.reauthenticate_with_email("user@example.com", "password123")
 
 ---
 
+## Prerequisites
+
+### Apple Sign-In
+
+Apple Sign-In requires the **Sign in with Apple** entitlement. Without it, `sign_in_with_apple()` and `link_with_apple()` will fail with `ASAuthorizationError error 1000`.
+
+1. **Godot Export Presets:** iOS export > Entitlements > Additional — append:
+   ```
+   <key>com.apple.developer.applesignin</key>
+   <array><string>Default</string></array>
+   ```
+2. **Apple Developer Portal:** Certificates, Identifiers & Profiles > your App ID > enable "Sign in with Apple"
+
+### Google Sign-In
+
+Google Sign-In requires the `REVERSED_CLIENT_ID` URL scheme in your `Info.plist` (from `GoogleService-Info.plist`). See [Firebase docs](https://firebase.google.com/docs/auth/ios/google-signin).
+
 ## Known Limitations
 
 - Google Sign-In requires a physical iOS device (arm64). The iOS Simulator is not supported.
