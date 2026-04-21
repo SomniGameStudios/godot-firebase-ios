@@ -9,6 +9,7 @@ import UIKit
 @Godot
 class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     @Signal("token") var token_received: SignalWithArguments<String>
+    @Signal("message") var token_error: SignalWithArguments<String>
     @Signal("data") var notification_received: SignalWithArguments<GDictionary>
     @Signal("data") var notification_opened: SignalWithArguments<GDictionary>
     @Signal("granted") var permission_result: SignalWithArguments<Bool>
@@ -102,6 +103,8 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
             DispatchQueue.main.async {
                 if let token {
                     self.token_received.emit(token)
+                } else if let error {
+                    self.token_error.emit(error.localizedDescription)
                 }
             }
         }

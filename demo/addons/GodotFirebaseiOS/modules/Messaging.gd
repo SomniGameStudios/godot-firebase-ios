@@ -1,6 +1,7 @@
 extends Node
 
 signal token_received(token: String)
+signal token_error(message: String)
 signal notification_received(data: Dictionary)
 signal notification_opened(data: Dictionary)
 signal permission_result(granted: bool)
@@ -17,6 +18,7 @@ func _connect_signals():
 	if not _plugin:
 		return
 	_plugin.connect("token_received", token_received.emit)
+	_plugin.connect("token_error", token_error.emit)
 	_plugin.connect("notification_received", notification_received.emit)
 	_plugin.connect("notification_opened", notification_opened.emit)
 	_plugin.connect("permission_result", permission_result.emit)
