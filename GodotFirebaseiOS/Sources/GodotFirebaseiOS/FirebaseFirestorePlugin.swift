@@ -206,24 +206,40 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     // MARK: - Query Documents
 
     @Callable
-    func query_documents(collection: String, filters: GArray, orderBy: String, orderDescending: Bool, limitCount: Int) {
+    func query_documents(collection: String, filtersJson: String, orderBy: String, orderDescending: Bool, limitCount: Int) {
         guard let db else {
             Task { @MainActor in self.query_task_completed.emit(self.buildResult(status: false, docID: "", error: "Firestore not initialized")) }
             return
         }
         var query: Query = db.collection(collection)
 
-        // Apply filters
-        for i in 0..<filters.size() {
-            guard let filterVariant = filters[Int(i)],
-                  let filterDict = GDictionary(filterVariant),
-                  let fieldVariant = filterDict[Variant("field")],
-                  let field = String(fieldVariant),
-                  let opVariant = filterDict[Variant("op")],
-                  let op = String(opVariant),
-                  let valueVariant = filterDict[Variant("value")] else { continue }
+        // Parse filters from JSON
+        guard let data = filtersJson.data(using: .utf8) else {
+            let result = buildResult(status: false, docID: "", error: "Invalid filters JSON: not UTF-8")
+            Task { @MainActor in self.query_task_completed.emit(result) }
+            return
+        }
 
-            let value = variantToSwift(valueVariant)
+        let parsed: [[String: Any]]
+        do {
+            let obj = try JSONSerialization.jsonObject(with: data, options: [])
+            guard let arr = obj as? [[String: Any]] else {
+                let result = buildResult(status: false, docID: "", error: "Filters JSON must be an array of objects")
+                Task { @MainActor in self.query_task_completed.emit(result) }
+                return
+            }
+            parsed = arr
+        } catch {
+            let result = buildResult(status: false, docID: "", error: "Invalid filters JSON: \(error.localizedDescription)")
+            Task { @MainActor in self.query_task_completed.emit(result) }
+            return
+        }
+
+        // Apply filters
+        for item in parsed {
+            guard let field = item["field"] as? String,
+                  let op = item["op"] as? String,
+                  let value = item["value"] else { continue }
 
             switch op {
             case "==":
@@ -241,17 +257,14 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             case "array_contains":
                 query = query.whereField(field, arrayContains: value)
             case "in":
-                if let arr = value as? [Any] {
-                    query = query.whereField(field, in: arr)
-                }
+                let list = (value as? [Any]) ?? [value]
+                query = query.whereField(field, in: list)
             case "not_in":
-                if let arr = value as? [Any] {
-                    query = query.whereField(field, notIn: arr)
-                }
+                let list = (value as? [Any]) ?? [value]
+                query = query.whereField(field, notIn: list)
             case "array_contains_any":
-                if let arr = value as? [Any] {
-                    query = query.whereField(field, arrayContainsAny: arr)
-                }
+                let list = (value as? [Any]) ?? [value]
+                query = query.whereField(field, arrayContainsAny: list)
             default:
                 break
             }
@@ -433,18 +446,18 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     }
 
     @Callable
-    func array_union(elements: GArray) -> GDictionary {
+    func array_union(elementsJson: String) -> GDictionary {
         var dict = GDictionary()
         dict[Variant("__type")] = Variant("arrayUnion")
-        dict[Variant("elements")] = Variant(elements)
+        dict[Variant("elementsJson")] = Variant(elementsJson)
         return dict
     }
 
     @Callable
-    func array_remove(elements: GArray) -> GDictionary {
+    func array_remove(elementsJson: String) -> GDictionary {
         var dict = GDictionary()
         dict[Variant("__type")] = Variant("arrayRemove")
-        dict[Variant("elements")] = Variant(elements)
+        dict[Variant("elementsJson")] = Variant(elementsJson)
         return dict
     }
 
@@ -500,13 +513,13 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
                         }
                         continue
                     case "arrayUnion":
-                        if let elemVariant = innerDict[Variant("elements")], let elements = GArray(elemVariant) {
-                            result[keyStr] = FieldValue.arrayUnion(gdArrayToSwift(elements))
+                        if let jsonVariant = innerDict[Variant("elementsJson")], let json = String(jsonVariant) {
+                            result[keyStr] = FieldValue.arrayUnion(parseJsonElementsArray(json))
                         }
                         continue
                     case "arrayRemove":
-                        if let elemVariant = innerDict[Variant("elements")], let elements = GArray(elemVariant) {
-                            result[keyStr] = FieldValue.arrayRemove(gdArrayToSwift(elements))
+                        if let jsonVariant = innerDict[Variant("elementsJson")], let json = String(jsonVariant) {
+                            result[keyStr] = FieldValue.arrayRemove(parseJsonElementsArray(json))
                         }
                         continue
                     default:
@@ -552,6 +565,17 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             result.append(variantToSwift(variant))
         }
         return result
+    }
+
+    private func parseJsonElementsArray(_ json: String) -> [Any] {
+        guard !json.isEmpty,
+              let data = json.data(using: .utf8) else { return [] }
+        do {
+            let obj = try JSONSerialization.jsonObject(with: data, options: [])
+            return (obj as? [Any]) ?? []
+        } catch {
+            return []
+        }
     }
 
     // MARK: - Data Conversion: Swift → GDictionary
