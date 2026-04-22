@@ -69,7 +69,7 @@ func stop_listening_to_document(document_path: String) -> void:
 
 func query_documents(collection: String, filters: Array = [], order_by: String = "", order_descending: bool = false, limit_count: int = 0) -> void:
 	if _plugin:
-		_plugin.query_documents(collection, filters, order_by, order_descending, limit_count)
+		_plugin.query_documents(collection, JSON.stringify(filters), order_by, order_descending, limit_count)
 
 # Collection Listeners
 
@@ -119,12 +119,12 @@ func server_timestamp() -> Dictionary:
 
 func array_union(elements: Array) -> Dictionary:
 	if _plugin:
-		return _plugin.array_union(elements)
+		return _plugin.array_union(JSON.stringify(elements))
 	return {}
 
 func array_remove(elements: Array) -> Dictionary:
 	if _plugin:
-		return _plugin.array_remove(elements)
+		return _plugin.array_remove(JSON.stringify(elements))
 	return {}
 
 func increment_by(value: int) -> Dictionary:
