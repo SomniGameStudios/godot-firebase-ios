@@ -661,6 +661,10 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         }
         dict[Variant("metadata")] = Variant(metadata)
 
+        dict[Variant("hasGoogle")] = Variant(user.providerData.contains { $0.providerID == "google.com" })
+        dict[Variant("hasApple")] = Variant(user.providerData.contains { $0.providerID == "apple.com" })
+        dict[Variant("providerIds")] = Variant(user.providerData.map { $0.providerID }.joined(separator: ","))
+
         var providers = GArray()
         for provider in user.providerData {
             var p = GDictionary()
