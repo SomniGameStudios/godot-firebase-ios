@@ -35,7 +35,17 @@ func _on_document_changed(document_path: String, data: Dictionary) -> void:
 	_log("listener", "path=%s data=%s" % [document_path, JSON.stringify(data)])
 
 func _on_query_completed(result: Dictionary) -> void:
-	_log("query", "status=%s docs=%s" % [result.get("status"), JSON.stringify(result.get("documents", []))])
+	var docs_json: String = result.get("documents_json", "")
+	var docs: Variant = result.get("documents", [])
+	if docs_json != "":
+		var parsed: Variant = JSON.parse_string(docs_json)
+		if parsed is Array:
+			docs = parsed
+	_log("query", "status=%s collection=%s docs=%s" % [
+		result.get("status"),
+		result.get("collection", ""),
+		JSON.stringify(docs),
+	])
 
 func _on_collection_changed(collection_path: String, documents: Array) -> void:
 	_log("collection", "path=%s count=%d" % [collection_path, documents.size()])
