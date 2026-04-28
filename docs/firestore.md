@@ -34,7 +34,7 @@ All task signals emit a single `result: Dictionary` with the following keys:
   Emitted when a listened document changes in real time.
 
 - `query_task_completed(result: Dictionary)`
-  Emitted after `query_documents()`. Result contains `{status: bool, documents: Array, error?: String}`. Each document in the array is `{docID: String, data: Dictionary}`.
+  Emitted after `query_documents()`. Result contains `{status: bool, collection: String, documents_json?: String, error?: String}`. On success, `documents_json` is a JSON array of flat documents shaped like `{"_docID": "...", ...fields}`.
 
 - `collection_changed(collection_path: String, documents: Array)`
   Emitted when a listened collection changes. Each document in the array is `{docID: String, data: Dictionary}`.
@@ -167,7 +167,7 @@ FirebaseIOS.firestore.use_emulator("localhost", 8080)
 
 Queries documents with filters, ordering, and limits. Filters is an Array of Dictionaries: `[{"field": "score", "op": ">", "value": 100}]`. Supported operators: `==`, `!=`, `<`, `<=`, `>`, `>=`, `array_contains`, `in`, `not_in`, `array_contains_any`.
 
-**Emits:** `query_task_completed`.
+**Emits:** `query_task_completed` with `collection` echoed back and `documents_json` on success.
 
 ```gdscript
 FirebaseIOS.firestore.query_documents("users", [{"field": "score", "op": ">", "value": 100}], "score", true, 10)
