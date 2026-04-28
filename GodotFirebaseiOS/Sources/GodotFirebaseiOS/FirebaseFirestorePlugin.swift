@@ -295,11 +295,11 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
                     flatDoc["_docID"] = doc.documentID
                     serializedDocs.append(flatDoc)
                 }
-                let result = self.buildQueryResult(
-                    status: true,
-                    collection: collection,
-                    documentsJson: self.encodeDocumentsJson(serializedDocs)
-                )
+                guard let json = self.encodeDocumentsJson(serializedDocs) else {
+                    self.query_task_completed.emit(self.buildQueryResult(status: false, collection: collection, error: "Failed to serialize query results to JSON"))
+                    return
+                }
+                let result = self.buildQueryResult(status: true, collection: collection, documentsJson: json)
                 self.query_task_completed.emit(result)
             }
         }
@@ -610,12 +610,12 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
         return dict
     }
 
-    private func encodeDocumentsJson(_ documents: [[String: Any]]) -> String {
+    private func encodeDocumentsJson(_ documents: [[String: Any]]) -> String? {
         guard JSONSerialization.isValidJSONObject(documents),
               let data = try? JSONSerialization.data(withJSONObject: documents, options: []) else {
-            return "[]"
+            return nil
         }
-        return String(data: data, encoding: .utf8) ?? "[]"
+        return String(data: data, encoding: .utf8)
     }
 
     private func toJsonSafe(_ value: Any) -> Any {
@@ -633,7 +633,7 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
         case let s as String:
             return s
         case let ts as Timestamp:
-            return ts.seconds
+            return ISO8601DateFormatter().string(from: ts.dateValue())
         case let dict as [String: Any]:
             return docDataToSwiftDictionary(dict)
         case let arr as [Any]:
