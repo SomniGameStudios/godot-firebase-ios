@@ -206,24 +206,40 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     // MARK: - Query Documents
 
     @Callable
-    func query_documents(collection: String, filters: GArray, orderBy: String, orderDescending: Bool, limitCount: Int) {
+    func query_documents(collection: String, filtersJson: String, orderBy: String, orderDescending: Bool, limitCount: Int) {
         guard let db else {
-            Task { @MainActor in self.query_task_completed.emit(self.buildResult(status: false, docID: "", error: "Firestore not initialized")) }
+            Task { @MainActor in self.query_task_completed.emit(self.buildQueryResult(status: false, collection: collection, error: "Firestore not initialized")) }
             return
         }
         var query: Query = db.collection(collection)
 
-        // Apply filters
-        for i in 0..<filters.size() {
-            guard let filterVariant = filters[Int(i)],
-                  let filterDict = GDictionary(filterVariant),
-                  let fieldVariant = filterDict[Variant("field")],
-                  let field = String(fieldVariant),
-                  let opVariant = filterDict[Variant("op")],
-                  let op = String(opVariant),
-                  let valueVariant = filterDict[Variant("value")] else { continue }
+        // Parse filters from JSON
+        guard let data = filtersJson.data(using: .utf8) else {
+            let result = buildQueryResult(status: false, collection: collection, error: "Invalid filters JSON: not UTF-8")
+            Task { @MainActor in self.query_task_completed.emit(result) }
+            return
+        }
 
-            let value = variantToSwift(valueVariant)
+        let parsed: [[String: Any]]
+        do {
+            let obj = try JSONSerialization.jsonObject(with: data, options: [])
+            guard let arr = obj as? [[String: Any]] else {
+                let result = buildQueryResult(status: false, collection: collection, error: "Filters JSON must be an array of objects")
+                Task { @MainActor in self.query_task_completed.emit(result) }
+                return
+            }
+            parsed = arr
+        } catch {
+            let result = buildQueryResult(status: false, collection: collection, error: "Invalid filters JSON: \(error.localizedDescription)")
+            Task { @MainActor in self.query_task_completed.emit(result) }
+            return
+        }
+
+        // Apply filters
+        for item in parsed {
+            guard let field = item["field"] as? String,
+                  let op = item["op"] as? String,
+                  let value = item["value"] else { continue }
 
             switch op {
             case "==":
@@ -241,17 +257,14 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             case "array_contains":
                 query = query.whereField(field, arrayContains: value)
             case "in":
-                if let arr = value as? [Any] {
-                    query = query.whereField(field, in: arr)
-                }
+                let list = (value as? [Any]) ?? [value]
+                query = query.whereField(field, in: list)
             case "not_in":
-                if let arr = value as? [Any] {
-                    query = query.whereField(field, notIn: arr)
-                }
+                let list = (value as? [Any]) ?? [value]
+                query = query.whereField(field, notIn: list)
             case "array_contains_any":
-                if let arr = value as? [Any] {
-                    query = query.whereField(field, arrayContainsAny: arr)
-                }
+                let list = (value as? [Any]) ?? [value]
+                query = query.whereField(field, arrayContainsAny: list)
             default:
                 break
             }
@@ -271,23 +284,22 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             guard let self else { return }
             Task { @MainActor in
                 if let error {
-                    self.query_task_completed.emit(self.buildResult(status: false, docID: "", error: error.localizedDescription))
+                    self.query_task_completed.emit(self.buildQueryResult(status: false, collection: collection, error: error.localizedDescription))
                     return
                 }
-                guard let documents = querySnapshot?.documents else {
-                    self.query_task_completed.emit(self.buildResult(status: true, docID: ""))
-                    return
-                }
-                var docsArray = GArray()
+                let documents = querySnapshot?.documents ?? []
+                var serializedDocs: [[String: Any]] = []
+                serializedDocs.reserveCapacity(documents.count)
                 for doc in documents {
-                    var docDict = GDictionary()
-                    docDict[Variant("docID")] = Variant(doc.documentID)
-                    docDict[Variant("data")] = Variant(self.docDataToGDDict(doc.data()))
-                    docsArray.append(Variant(docDict))
+                    var flatDoc = self.docDataToSwiftDictionary(doc.data())
+                    flatDoc["_docID"] = doc.documentID
+                    serializedDocs.append(flatDoc)
                 }
-                var result = GDictionary()
-                result[Variant("status")] = Variant(true)
-                result[Variant("documents")] = Variant(docsArray)
+                guard let json = self.encodeDocumentsJson(serializedDocs) else {
+                    self.query_task_completed.emit(self.buildQueryResult(status: false, collection: collection, error: "Failed to serialize query results to JSON"))
+                    return
+                }
+                let result = self.buildQueryResult(status: true, collection: collection, documentsJson: json)
                 self.query_task_completed.emit(result)
             }
         }
@@ -433,18 +445,18 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     }
 
     @Callable
-    func array_union(elements: GArray) -> GDictionary {
+    func array_union(elementsJson: String) -> GDictionary {
         var dict = GDictionary()
         dict[Variant("__type")] = Variant("arrayUnion")
-        dict[Variant("elements")] = Variant(elements)
+        dict[Variant("elementsJson")] = Variant(elementsJson)
         return dict
     }
 
     @Callable
-    func array_remove(elements: GArray) -> GDictionary {
+    func array_remove(elementsJson: String) -> GDictionary {
         var dict = GDictionary()
         dict[Variant("__type")] = Variant("arrayRemove")
-        dict[Variant("elements")] = Variant(elements)
+        dict[Variant("elementsJson")] = Variant(elementsJson)
         return dict
     }
 
@@ -470,6 +482,15 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
         result[Variant("status")] = Variant(status)
         result[Variant("docID")] = Variant(docID)
         if let data { result[Variant("data")] = Variant(data) }
+        if let error { result[Variant("error")] = Variant(error) }
+        return result
+    }
+
+    private func buildQueryResult(status: Bool, collection: String, documentsJson: String? = nil, error: String? = nil) -> GDictionary {
+        var result = GDictionary()
+        result[Variant("status")] = Variant(status)
+        result[Variant("collection")] = Variant(collection)
+        if let documentsJson { result[Variant("documents_json")] = Variant(documentsJson) }
         if let error { result[Variant("error")] = Variant(error) }
         return result
     }
@@ -500,13 +521,13 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
                         }
                         continue
                     case "arrayUnion":
-                        if let elemVariant = innerDict[Variant("elements")], let elements = GArray(elemVariant) {
-                            result[keyStr] = FieldValue.arrayUnion(gdArrayToSwift(elements))
+                        if let jsonVariant = innerDict[Variant("elementsJson")], let json = String(jsonVariant) {
+                            result[keyStr] = FieldValue.arrayUnion(parseJsonElementsArray(json))
                         }
                         continue
                     case "arrayRemove":
-                        if let elemVariant = innerDict[Variant("elements")], let elements = GArray(elemVariant) {
-                            result[keyStr] = FieldValue.arrayRemove(gdArrayToSwift(elements))
+                        if let jsonVariant = innerDict[Variant("elementsJson")], let json = String(jsonVariant) {
+                            result[keyStr] = FieldValue.arrayRemove(parseJsonElementsArray(json))
                         }
                         continue
                     default:
@@ -554,6 +575,17 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
         return result
     }
 
+    private func parseJsonElementsArray(_ json: String) -> [Any] {
+        guard !json.isEmpty,
+              let data = json.data(using: .utf8) else { return [] }
+        do {
+            let obj = try JSONSerialization.jsonObject(with: data, options: [])
+            return (obj as? [Any]) ?? []
+        } catch {
+            return []
+        }
+    }
+
     // MARK: - Data Conversion: Swift → GDictionary
 
     private func snapshotToGDDict(_ snapshot: DocumentSnapshot?) -> GDictionary {
@@ -567,6 +599,48 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             dict[Variant(key)] = swiftToVariant(value)
         }
         return dict
+    }
+
+    private func docDataToSwiftDictionary(_ data: [String: Any]) -> [String: Any] {
+        var dict: [String: Any] = [:]
+        dict.reserveCapacity(data.count)
+        for (key, value) in data {
+            dict[key] = toJsonSafe(value)
+        }
+        return dict
+    }
+
+    private func encodeDocumentsJson(_ documents: [[String: Any]]) -> String? {
+        guard JSONSerialization.isValidJSONObject(documents),
+              let data = try? JSONSerialization.data(withJSONObject: documents, options: []) else {
+            return nil
+        }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func toJsonSafe(_ value: Any) -> Any {
+        switch value {
+        case let b as Bool:
+            return b
+        case let i as Int:
+            return i
+        case let i as Int64:
+            return Int(i)
+        case let d as Double:
+            return d
+        case let f as Float:
+            return Double(f)
+        case let s as String:
+            return s
+        case let ts as Timestamp:
+            return ISO8601DateFormatter().string(from: ts.dateValue())
+        case let dict as [String: Any]:
+            return docDataToSwiftDictionary(dict)
+        case let arr as [Any]:
+            return arr.map { toJsonSafe($0) }
+        default:
+            return String(describing: value)
+        }
     }
 
     private func swiftToVariant(_ value: Any) -> Variant {
