@@ -17,43 +17,44 @@ var _plugin: Object
 func _connect_signals():
 	if not _plugin:
 		return
-	_plugin.connect("token_received", token_received.emit)
-	_plugin.connect("token_error", token_error.emit)
-	_plugin.connect("notification_received", notification_received.emit)
-	_plugin.connect("notification_opened", notification_opened.emit)
-	_plugin.connect("permission_result", permission_result.emit)
-	_plugin.connect("topic_subscribe_success", topic_subscribe_success.emit)
-	_plugin.connect("topic_subscribe_failure", topic_subscribe_failure.emit)
-	_plugin.connect("topic_unsubscribe_success", topic_unsubscribe_success.emit)
-	_plugin.connect("topic_unsubscribe_failure", topic_unsubscribe_failure.emit)
-	_plugin.connect("token_delete_success", token_delete_success.emit)
-	_plugin.connect("token_delete_failure", token_delete_failure.emit)
+	_plugin.connect("messaging_token_received", token_received.emit)
+	_plugin.connect("messaging_token_error", token_error.emit)
+	_plugin.connect("messaging_notification_received", notification_received.emit)
+	_plugin.connect("messaging_notification_opened", notification_opened.emit)
+	_plugin.connect("messaging_permission_result", permission_result.emit)
+	_plugin.connect("messaging_topic_subscribe_success", topic_subscribe_success.emit)
+	_plugin.connect("messaging_topic_subscribe_failure", topic_subscribe_failure.emit)
+	_plugin.connect("messaging_topic_unsubscribe_success", topic_unsubscribe_success.emit)
+	_plugin.connect("messaging_topic_unsubscribe_failure", topic_unsubscribe_failure.emit)
+	_plugin.connect("messaging_token_delete_success", token_delete_success.emit)
+	_plugin.connect("messaging_token_delete_failure", token_delete_failure.emit)
+
 
 func configure() -> void:
 	if _plugin:
-		_plugin.configure()
+		_plugin.messagingConfigure()
 
 func request_permission(provisional: bool = false) -> void:
 	if _plugin:
-		_plugin.request_permission(provisional)
+		_plugin.messagingRequestPermission(provisional)
 
 func get_permission_status() -> String:
 	if _plugin:
-		return _plugin.get_permission_status()
+		return _plugin.messagingGetPermissionStatus()
 	return "unsupported"
 
 func get_token() -> void:
 	if _plugin:
-		_plugin.get_token()
+		_plugin.messagingGetToken()
 
 func delete_token() -> void:
 	if _plugin:
-		_plugin.delete_token()
+		_plugin.messagingDeleteToken()
 
 func subscribe_to_topic(topic: String) -> void:
 	if _plugin:
-		_plugin.subscribe_to_topic(topic)
+		_plugin.messagingSubscribeToTopic(topic)
 
 func unsubscribe_from_topic(topic: String) -> void:
 	if _plugin:
-		_plugin.unsubscribe_from_topic(topic)
+		_plugin.messagingUnsubscribeFromTopic(topic)

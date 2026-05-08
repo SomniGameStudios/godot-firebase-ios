@@ -8,17 +8,18 @@ import UIKit
 
 @Godot
 class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
-    @Signal("token") var token_received: SignalWithArguments<String>
-    @Signal("message") var token_error: SignalWithArguments<String>
-    @Signal("data") var notification_received: SignalWithArguments<GDictionary>
-    @Signal("data") var notification_opened: SignalWithArguments<GDictionary>
-    @Signal("granted") var permission_result: SignalWithArguments<Bool>
-    @Signal("topic") var topic_subscribe_success: SignalWithArguments<String>
-    @Signal("message") var topic_subscribe_failure: SignalWithArguments<String>
-    @Signal("topic") var topic_unsubscribe_success: SignalWithArguments<String>
-    @Signal("message") var topic_unsubscribe_failure: SignalWithArguments<String>
-    @Signal var token_delete_success: SimpleSignal
-    @Signal("message") var token_delete_failure: SignalWithArguments<String>
+    @Signal("messaging_token_received") var token_received: SignalWithArguments<String>
+    @Signal("messaging_token_error") var token_error: SignalWithArguments<String>
+    @Signal("messaging_notification_received") var notification_received: SignalWithArguments<GDictionary>
+    @Signal("messaging_notification_opened") var notification_opened: SignalWithArguments<GDictionary>
+    @Signal("messaging_permission_result") var permission_result: SignalWithArguments<Bool>
+    @Signal("messaging_topic_subscribe_success") var topic_subscribe_success: SignalWithArguments<String>
+    @Signal("messaging_topic_subscribe_failure") var topic_subscribe_failure: SignalWithArguments<String>
+    @Signal("messaging_topic_unsubscribe_success") var topic_unsubscribe_success: SignalWithArguments<String>
+    @Signal("messaging_topic_unsubscribe_failure") var topic_unsubscribe_failure: SignalWithArguments<String>
+    @Signal var messaging_token_delete_success: SimpleSignal
+    @Signal("messaging_token_delete_failure") var token_delete_failure: SignalWithArguments<String>
+
 
     private var isConfigured = false
     private var delegateHelper: MessagingDelegateHelper?
@@ -27,7 +28,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     // MARK: - Configuration
 
     @Callable
-    func configure() {
+    func messagingConfigure() {
         #if os(iOS)
         guard !isConfigured else { return }
         guard FirebaseApp.app() != nil else {
@@ -55,7 +56,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     // MARK: - Permission
 
     @Callable
-    func request_permission(provisional: Bool) {
+    func messagingRequestPermission(provisional: Bool) {
         #if os(iOS)
         var options: UNAuthorizationOptions = [.alert, .sound, .badge]
         if provisional {
@@ -71,7 +72,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     }
 
     @Callable
-    func get_permission_status() -> String {
+    func messagingGetPermissionStatus() -> String {
         #if os(iOS)
         var result = "unknown"
         let semaphore = DispatchSemaphore(value: 0)
@@ -96,7 +97,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     // MARK: - Token
 
     @Callable
-    func get_token() {
+    func messagingGetToken() {
         #if os(iOS)
         Messaging.messaging().token { [weak self] token, error in
             guard let self else { return }
@@ -112,7 +113,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     }
 
     @Callable
-    func delete_token() {
+    func messagingDeleteToken() {
         #if os(iOS)
         Messaging.messaging().deleteToken { [weak self] error in
             guard let self else { return }
@@ -120,7 +121,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
                 if let error {
                     self.token_delete_failure.emit(error.localizedDescription)
                 } else {
-                    self.token_delete_success.emit()
+                    self.messaging_token_delete_success.emit()
                 }
             }
         }
@@ -130,7 +131,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     // MARK: - Topics
 
     @Callable
-    func subscribe_to_topic(topic: String) {
+    func messagingSubscribeToTopic(topic: String) {
         #if os(iOS)
         Messaging.messaging().subscribe(toTopic: topic) { [weak self] error in
             guard let self else { return }
@@ -146,7 +147,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     }
 
     @Callable
-    func unsubscribe_from_topic(topic: String) {
+    func messagingUnsubscribeFromTopic(topic: String) {
         #if os(iOS)
         Messaging.messaging().unsubscribe(fromTopic: topic) { [weak self] error in
             guard let self else { return }
