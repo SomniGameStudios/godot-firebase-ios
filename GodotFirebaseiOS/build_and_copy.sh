@@ -33,24 +33,48 @@ xcodebuild \
   -skipPackagePluginValidation \
   -skipMacroValidation \
   CODE_SIGNING_ALLOWED=NO \
-  CODE_SIGNING_REQUIRED=NO 
+  CODE_SIGNING_REQUIRED=NO \
+  DEBUG_INFORMATION_FORMAT="dwarf-with-dsym"
 
 echo "📋 Locating built framework..."
 FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
+DSYM_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/GodotFirebaseiOS.framework.dSYM"
+XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
 
 if [ ! -d "$FRAMEWORK_SOURCE" ]; then
   echo "❌ Error: Framework not found at $FRAMEWORK_SOURCE"
   exit 1
 fi
 
+if [ ! -d "$DSYM_SOURCE" ]; then
+  echo "⚠️ Warning: dSYM not found at $DSYM_SOURCE. Archive warnings may persist."
+fi
+
+# --- Create XCFramework ---
+
+echo "📦 Creating XCFramework..."
+rm -rf "$XCFRAMEWORK_OUT"
+
+if [ -d "$DSYM_SOURCE" ]; then
+  xcodebuild -create-xcframework \
+    -framework "$FRAMEWORK_SOURCE" \
+    -debug-symbols "$(cd "$(dirname "$DSYM_SOURCE")" && pwd)/$(basename "$DSYM_SOURCE")" \
+    -output "$XCFRAMEWORK_OUT"
+else
+  xcodebuild -create-xcframework \
+    -framework "$FRAMEWORK_SOURCE" \
+    -output "$XCFRAMEWORK_OUT"
+fi
 
 # --- Addon Update ---
 
 echo "📦 Updating addon folder..."
 
-# Clean up old framework and copy the fresh one
+# Clean up old xcframework/framework and copy the fresh xcframework
 rm -rf "$ADDON_PATH/GodotFirebaseiOS.framework"
-cp -r "$FRAMEWORK_SOURCE" "$ADDON_PATH/"
+rm -rf "$ADDON_PATH/GodotFirebaseiOS.framework.dSYM"
+rm -rf "$ADDON_PATH/GodotFirebaseiOS.xcframework"
 
+cp -r "$XCFRAMEWORK_OUT" "$ADDON_PATH/"
 
 echo "✅ Done! Addon updated at $ADDON_PATH"
