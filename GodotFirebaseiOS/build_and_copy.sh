@@ -34,9 +34,9 @@ xcodebuild \
   -skipMacroValidation \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
-  DEBUG_INFORMATION_FORMAT="dwarf-with-dsym"
+  DEBUG_INFORMATION_FORMAT="dwarf-with-dsym" || true
 
-echo "📋 Locating built framework..."
+echo "📋 Locating built frameworks..."
 FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
 DSYM_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/GodotFirebaseiOS.framework.dSYM"
 XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
@@ -46,15 +46,30 @@ if [ ! -d "$FRAMEWORK_SOURCE" ]; then
   exit 1
 fi
 
+# Locate SwiftGodotRuntime
+RUNTIME_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/SwiftGodotRuntime.framework"
+RUNTIME_XCFRAMEWORK_OUT="$BUILD_PATH/SwiftGodotRuntime.xcframework"
+
+if [ ! -d "$RUNTIME_SOURCE" ]; then
+  RUNTIME_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/SwiftGodotRuntime.framework"
+fi
+
+if [ ! -d "$RUNTIME_SOURCE" ]; then
+  echo "❌ Error: SwiftGodotRuntime.framework not found"
+  exit 1
+fi
+
 if [ ! -d "$DSYM_SOURCE" ]; then
   echo "⚠️ Warning: dSYM not found at $DSYM_SOURCE. Archive warnings may persist."
 fi
 
-# --- Create XCFramework ---
+# --- Create XCFrameworks ---
 
-echo "📦 Creating XCFramework..."
+echo "📦 Creating XCFrameworks..."
 rm -rf "$XCFRAMEWORK_OUT"
+rm -rf "$RUNTIME_XCFRAMEWORK_OUT"
 
+# Plugin XCFramework
 if [ -d "$DSYM_SOURCE" ]; then
   xcodebuild -create-xcframework \
     -framework "$FRAMEWORK_SOURCE" \
@@ -66,15 +81,22 @@ else
     -output "$XCFRAMEWORK_OUT"
 fi
 
+# Runtime XCFramework (shared core)
+xcodebuild -create-xcframework \
+  -framework "$RUNTIME_SOURCE" \
+  -output "$RUNTIME_XCFRAMEWORK_OUT"
+
 # --- Addon Update ---
 
 echo "📦 Updating addon folder..."
 
-# Clean up old xcframework/framework and copy the fresh xcframework
+# Clean up old xcframeworks and copy the fresh ones
 rm -rf "$ADDON_PATH/GodotFirebaseiOS.framework"
 rm -rf "$ADDON_PATH/GodotFirebaseiOS.framework.dSYM"
 rm -rf "$ADDON_PATH/GodotFirebaseiOS.xcframework"
+rm -rf "$ADDON_PATH/SwiftGodotRuntime.xcframework"
 
 cp -r "$XCFRAMEWORK_OUT" "$ADDON_PATH/"
+cp -r "$RUNTIME_XCFRAMEWORK_OUT" "$ADDON_PATH/"
 
 echo "✅ Done! Addon updated at $ADDON_PATH"

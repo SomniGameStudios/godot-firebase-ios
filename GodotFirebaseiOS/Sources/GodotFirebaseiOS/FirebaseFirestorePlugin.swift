@@ -50,15 +50,16 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             return
         }
         let swiftData = gdDictToSwift(data)
-        var ref: DocumentReference?
-        ref = db.collection(collection).addDocument(data: swiftData) { [weak self] error in
+        let ref = db.collection(collection).document()
+        let docID = ref.documentID
+        ref.setData(swiftData) { [weak self] error in
             guard let self else { return }
+            let errorDescription = error?.localizedDescription
             Task { @MainActor in
-                if let error {
-                    self.write_task_completed.emit(self.buildResult(status: false, docID: "", error: error.localizedDescription))
+                if let errorDescription {
+                    self.write_task_completed.emit(self.buildResult(status: false, docID: "", error: errorDescription))
                     return
                 }
-                let docID = ref?.documentID ?? ""
                 self.write_task_completed.emit(self.buildResult(status: true, docID: docID, data: data))
             }
         }
@@ -421,12 +422,14 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             return snapshot.data()
         }) { [weak self] result, error in
             guard let self else { return }
+            nonisolated(unsafe) let capturedData = result as? [String: Any]
+            let errorDescription = error?.localizedDescription
             Task { @MainActor in
-                if let error {
-                    self.transaction_task_completed.emit(self.buildResult(status: false, docID: documentId, error: error.localizedDescription))
+                if let errorDescription {
+                    self.transaction_task_completed.emit(self.buildResult(status: false, docID: documentId, error: errorDescription))
                     return
                 }
-                if let data = result as? [String: Any] {
+                if let data = capturedData {
                     self.transaction_task_completed.emit(self.buildResult(status: true, docID: documentId, data: self.docDataToGDDict(data)))
                 } else {
                     self.transaction_task_completed.emit(self.buildResult(status: true, docID: documentId))
@@ -501,8 +504,8 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
         var result: [String: Any] = [:]
         let keys = gdDict.keys()
         for i in 0..<keys.size() {
-            let keyVariant = keys[Int(i)]
-            guard let keyStr = String(keyVariant) else { continue }
+            guard let keyVariant = keys[Int(i)],
+                  let keyStr = String(keyVariant) else { continue }
             guard let value = gdDict[keyVariant] else { continue }
 
             // Check for FieldValue sentinels
