@@ -103,6 +103,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
 
 
     private var isConfigured = false
+    private var pendingTokenRequest = false
     private var delegateHelper: MessagingDelegateHelper?
     private var notificationDelegateHelper: NotificationDelegateHelper?
 
@@ -164,14 +165,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
             self.log("received Godot APNs device-token notification; bytes=\(deviceToken.count)")
             Messaging.messaging().apnsToken = deviceToken
             self.logTokenState("after manual APNs token mapping")
-            
-            // Speed up the first token fetch after APNS handover
-            Messaging.messaging().token { token, _ in
-                if let token = token {
-                    self.log("FCM token fetched after APNs handover; length=\(token.count)")
-                    self.token_received.emit(token)
-                }
-            }
+            self.fetchFCMToken(reason: "APNs handover")
         }
 
         NotificationCenter.default.addObserver(forName: NSNotification.Name("GodotDidFailToRegisterForRemoteNotifications"), object: nil, queue: .main) { [weak self] notification in
@@ -212,6 +206,8 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
             guard let self else { return }
             DispatchQueue.main.async {
                 self.log("notification permission result=\(granted)")
+                self.log("calling UIApplication.registerForRemoteNotifications() after permission result")
+                UIApplication.shared.registerForRemoteNotifications()
                 self.logTokenState("after permission result")
                 self.permission_result.emit(granted)
             }
@@ -247,6 +243,23 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     @Callable
     func messagingGetToken() {
         #if os(iOS)
+        if Messaging.messaging().apnsToken == nil {
+            pendingTokenRequest = true
+            log("FCM token request delayed: Firebase APNs token is missing")
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+            logTokenState("delayed FCM token request")
+            return
+        }
+        fetchFCMToken(reason: "manual request")
+        #endif
+    }
+
+    private func fetchFCMToken(reason: String) {
+        #if os(iOS)
+        pendingTokenRequest = false
+        log("requesting FCM token; reason=\(reason)")
         logTokenState("before FCM token request")
         Messaging.messaging().token { [weak self] token, error in
             guard let self else { return }
