@@ -39,9 +39,11 @@ class iOSExportPlugin extends EditorExportPlugin:
 		var reversed_client_id := _extract_reversed_client_id(PLIST_PATH)
 		if reversed_client_id.is_empty():
 			push_warning("GodotFirebaseiOS: REVERSED_CLIENT_ID not found in GoogleService-Info.plist. Google Sign-In will crash.")
-			return
-		add_ios_plist_content(_make_url_scheme_plist(reversed_client_id))
+		else:
+			add_ios_plist_content(_make_url_scheme_plist(reversed_client_id))
+		
 		add_ios_plist_content(_make_fcm_plist())
+		add_ios_entitlements(_make_entitlements(_is_debug))
 
 	func _extract_reversed_client_id(plist_path: String) -> String:
 		var parser := XMLParser.new()
@@ -75,8 +77,13 @@ class iOSExportPlugin extends EditorExportPlugin:
 
 	func _make_fcm_plist() -> String:
 		return """<key>FirebaseAppDelegateProxyEnabled</key>
-<true/>
+<false/>
 <key>UIBackgroundModes</key>
 <array>
 	<string>remote-notification</string>
 </array>"""
+
+	func _make_entitlements(is_debug: bool) -> String:
+		var env := "development" if is_debug else "production"
+		return """<key>aps-environment</key>
+<string>%s</string>""" % env

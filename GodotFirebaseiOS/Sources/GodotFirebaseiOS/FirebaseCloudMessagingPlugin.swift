@@ -237,19 +237,19 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
                 if let aps = value as? [String: Any] {
                     if let alert = aps["alert"] as? [String: Any] {
                         if let title = alert["title"] as? String {
-                            dict[Variant("_title")] = Variant(title)
+                            dict[Variant("title")] = Variant(title)
                         }
                         if let body = alert["body"] as? String {
-                            dict[Variant("_body")] = Variant(body)
+                            dict[Variant("body")] = Variant(body)
                         }
                     } else if let alertStr = aps["alert"] as? String {
-                        dict[Variant("_body")] = Variant(alertStr)
+                        dict[Variant("body")] = Variant(alertStr)
                     }
                     if let badge = aps["badge"] as? Int {
-                        dict[Variant("_badge")] = Variant(badge)
+                        dict[Variant("badge")] = Variant(badge)
                     }
                     if let sound = aps["sound"] as? String {
-                        dict[Variant("_sound")] = Variant(sound)
+                        dict[Variant("sound")] = Variant(sound)
                     }
                 }
                 continue
