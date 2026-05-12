@@ -25,40 +25,85 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     private var delegateHelper: MessagingDelegateHelper?
     private var notificationDelegateHelper: NotificationDelegateHelper?
 
+    private func log(_ message: String) {
+        GD.print("FirebaseCloudMessagingPlugin: \(message)")
+    }
+
+    private func logTokenState(_ context: String) {
+        #if os(iOS)
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            let authorizationStatus: String
+            switch settings.authorizationStatus {
+            case .notDetermined: authorizationStatus = "not_determined"
+            case .denied: authorizationStatus = "denied"
+            case .authorized: authorizationStatus = "authorized"
+            case .provisional: authorizationStatus = "provisional"
+            case .ephemeral: authorizationStatus = "ephemeral"
+            @unknown default: authorizationStatus = "unknown"
+            }
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                let apnsTokenState = Messaging.messaging().apnsToken == nil ? "missing" : "present"
+                let remoteRegistrationState = UIApplication.shared.isRegisteredForRemoteNotifications ? "registered" : "not_registered"
+                self.log("\(context): notification_permission=\(authorizationStatus), remote_notifications=\(remoteRegistrationState), firebase_apns_token=\(apnsTokenState)")
+            }
+        }
+        #endif
+    }
+
     // MARK: - Configuration
 
     @Callable
     func messagingConfigure() {
         #if os(iOS)
-        guard !isConfigured else { return }
+        guard !isConfigured else {
+            log("configure skipped: already configured")
+            return
+        }
         guard FirebaseApp.app() != nil else {
             GD.pushWarning("FirebaseCloudMessagingPlugin: FirebaseApp not configured. Call Auth.initialize() first.")
             return
         }
 
+        log("configure started")
         delegateHelper = MessagingDelegateHelper(plugin: self)
         Messaging.messaging().delegate = delegateHelper
+        log("Messaging delegate attached")
 
         notificationDelegateHelper = NotificationDelegateHelper(plugin: self)
 
         let previousDelegate = UNUserNotificationCenter.current().delegate
         notificationDelegateHelper?.previousDelegate = previousDelegate
         UNUserNotificationCenter.current().delegate = notificationDelegateHelper
+        log("UNUserNotificationCenter delegate attached; previous delegate=\(String(describing: previousDelegate))")
 
         DispatchQueue.main.async {
+            self.log("calling UIApplication.registerForRemoteNotifications()")
             UIApplication.shared.registerForRemoteNotifications()
         }
 
         NotificationCenter.default.addObserver(forName: NSNotification.Name("GodotDidRegisterForRemoteNotificationsWithDeviceToken"), object: nil, queue: .main) { [weak self] notification in
             guard let self = self, let deviceToken = notification.userInfo?["deviceToken"] as? Data else { return }
+            self.log("received Godot APNs device-token notification; bytes=\(deviceToken.count)")
             Messaging.messaging().apnsToken = deviceToken
+            self.logTokenState("after manual APNs token mapping")
             
             // Speed up the first token fetch after APNS handover
             Messaging.messaging().token { token, _ in
                 if let token = token {
+                    self.log("FCM token fetched after APNs handover; length=\(token.count)")
                     self.token_received.emit(token)
                 }
             }
+        }
+
+        logTokenState("after configure")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.logTokenState("2s after configure")
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) { [weak self] in
+            self?.logTokenState("6s after configure")
         }
 
         isConfigured = true
@@ -70,6 +115,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     @Callable
     func messagingRequestPermission(provisional: Bool) {
         #if os(iOS)
+        log("requesting notification permission; provisional=\(provisional)")
         var options: UNAuthorizationOptions = [.alert, .sound, .badge]
         if provisional {
             options.insert(.provisional)
@@ -77,6 +123,8 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
         UNUserNotificationCenter.current().requestAuthorization(options: options) { [weak self] granted, _ in
             guard let self else { return }
             DispatchQueue.main.async {
+                self.log("notification permission result=\(granted)")
+                self.logTokenState("after permission result")
                 self.permission_result.emit(granted)
             }
         }
@@ -111,13 +159,18 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
     @Callable
     func messagingGetToken() {
         #if os(iOS)
+        logTokenState("before FCM token request")
         Messaging.messaging().token { [weak self] token, error in
             guard let self else { return }
             DispatchQueue.main.async {
                 if let token {
+                    self.log("FCM token request succeeded; length=\(token.count)")
                     self.token_received.emit(token)
                 } else if let error {
+                    self.log("FCM token request failed: \(error.localizedDescription)")
                     self.token_error.emit(error.localizedDescription)
+                } else {
+                    self.log("FCM token request returned no token and no error")
                 }
             }
         }
