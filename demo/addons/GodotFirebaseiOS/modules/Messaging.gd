@@ -17,17 +17,17 @@ var _plugin: Object
 func _connect_signals():
 	if not _plugin:
 		return
-	_plugin.connect("messaging_token_received", token_received.emit)
-	_plugin.connect("messaging_token_error", token_error.emit)
-	_plugin.connect("messaging_notification_received", notification_received.emit)
-	_plugin.connect("messaging_notification_opened", notification_opened.emit)
-	_plugin.connect("messaging_permission_result", permission_result.emit)
-	_plugin.connect("messaging_topic_subscribe_success", topic_subscribe_success.emit)
-	_plugin.connect("messaging_topic_subscribe_failure", topic_subscribe_failure.emit)
-	_plugin.connect("messaging_topic_unsubscribe_success", topic_unsubscribe_success.emit)
-	_plugin.connect("messaging_topic_unsubscribe_failure", topic_unsubscribe_failure.emit)
-	_plugin.connect("messaging_token_delete_success", token_delete_success.emit)
-	_plugin.connect("messaging_token_delete_failure", token_delete_failure.emit)
+	_plugin.connect("token_received", token_received.emit)
+	_plugin.connect("token_error", token_error.emit)
+	_plugin.connect("notification_received", notification_received.emit)
+	_plugin.connect("notification_opened", notification_opened.emit)
+	_plugin.connect("permission_result", permission_result.emit)
+	_plugin.connect("topic_subscribe_success", topic_subscribe_success.emit)
+	_plugin.connect("topic_subscribe_failure", topic_subscribe_failure.emit)
+	_plugin.connect("topic_unsubscribe_success", topic_unsubscribe_success.emit)
+	_plugin.connect("topic_unsubscribe_failure", topic_unsubscribe_failure.emit)
+	_plugin.connect("token_delete_success", token_delete_success.emit)
+	_plugin.connect("token_delete_failure", token_delete_failure.emit)
 
 
 func configure() -> void:

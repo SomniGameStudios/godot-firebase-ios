@@ -4,21 +4,102 @@ import FirebaseMessaging
 import UserNotifications
 #if canImport(UIKit)
 import UIKit
+import ObjectiveC
+#endif
+
+// MARK: - APNs Registration Interception
+
+#if os(iOS)
+private final class APNsRegistrationInterceptor {
+    private typealias DidRegisterIMP = @convention(c) (AnyObject, Selector, UIApplication, Data) -> Void
+    private typealias DidFailIMP = @convention(c) (AnyObject, Selector, UIApplication, NSError) -> Void
+
+    private static var installedClassIds = Set<ObjectIdentifier>()
+    private static var originalDidRegisterImplementations: [ObjectIdentifier: IMP] = [:]
+    private static var originalDidFailImplementations: [ObjectIdentifier: IMP] = [:]
+
+    static func install() {
+        guard let delegate = UIApplication.shared.delegate else {
+            GD.print("FirebaseCloudMessagingPlugin: APNs interceptor skipped: UIApplication delegate is nil")
+            return
+        }
+        guard let delegateClass = object_getClass(delegate) else {
+            GD.print("FirebaseCloudMessagingPlugin: APNs interceptor skipped: could not read UIApplication delegate class")
+            return
+        }
+
+        let classId = ObjectIdentifier(delegateClass)
+        guard !installedClassIds.contains(classId) else { return }
+        installedClassIds.insert(classId)
+
+        installDidRegister(on: delegateClass, classId: classId)
+        installDidFail(on: delegateClass, classId: classId)
+        GD.print("FirebaseCloudMessagingPlugin: APNs interceptor installed on \(delegateClass)")
+    }
+
+    private static func installDidRegister(on delegateClass: AnyClass, classId: ObjectIdentifier) {
+        let selector = #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
+        let block: @convention(block) (AnyObject, UIApplication, Data) -> Void = { delegate, application, deviceToken in
+            GD.print("FirebaseCloudMessagingPlugin: intercepted APNs device token; bytes=\(deviceToken.count)")
+            NotificationCenter.default.post(
+                name: NSNotification.Name("GodotDidRegisterForRemoteNotificationsWithDeviceToken"),
+                object: nil,
+                userInfo: ["deviceToken": deviceToken]
+            )
+
+            if let originalImplementation = originalDidRegisterImplementations[classId] {
+                let original = unsafeBitCast(originalImplementation, to: DidRegisterIMP.self)
+                original(delegate, selector, application, deviceToken)
+            }
+        }
+
+        let newImplementation = imp_implementationWithBlock(block)
+        if let method = class_getInstanceMethod(delegateClass, selector) {
+            originalDidRegisterImplementations[classId] = method_setImplementation(method, newImplementation)
+        } else {
+            class_addMethod(delegateClass, selector, newImplementation, "v@:@@")
+        }
+    }
+
+    private static func installDidFail(on delegateClass: AnyClass, classId: ObjectIdentifier) {
+        let selector = #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:))
+        let block: @convention(block) (AnyObject, UIApplication, NSError) -> Void = { delegate, application, error in
+            GD.print("FirebaseCloudMessagingPlugin: intercepted APNs registration failure: \(error.localizedDescription)")
+            NotificationCenter.default.post(
+                name: NSNotification.Name("GodotDidFailToRegisterForRemoteNotifications"),
+                object: nil,
+                userInfo: ["error": error.localizedDescription]
+            )
+
+            if let originalImplementation = originalDidFailImplementations[classId] {
+                let original = unsafeBitCast(originalImplementation, to: DidFailIMP.self)
+                original(delegate, selector, application, error)
+            }
+        }
+
+        let newImplementation = imp_implementationWithBlock(block)
+        if let method = class_getInstanceMethod(delegateClass, selector) {
+            originalDidFailImplementations[classId] = method_setImplementation(method, newImplementation)
+        } else {
+            class_addMethod(delegateClass, selector, newImplementation, "v@:@@")
+        }
+    }
+}
 #endif
 
 @Godot
 class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
-    @Signal("messaging_token_received") var token_received: SignalWithArguments<String>
-    @Signal("messaging_token_error") var token_error: SignalWithArguments<String>
-    @Signal("messaging_notification_received") var notification_received: SignalWithArguments<GDictionary>
-    @Signal("messaging_notification_opened") var notification_opened: SignalWithArguments<GDictionary>
-    @Signal("messaging_permission_result") var permission_result: SignalWithArguments<Bool>
-    @Signal("messaging_topic_subscribe_success") var topic_subscribe_success: SignalWithArguments<String>
-    @Signal("messaging_topic_subscribe_failure") var topic_subscribe_failure: SignalWithArguments<String>
-    @Signal("messaging_topic_unsubscribe_success") var topic_unsubscribe_success: SignalWithArguments<String>
-    @Signal("messaging_topic_unsubscribe_failure") var topic_unsubscribe_failure: SignalWithArguments<String>
-    @Signal var messaging_token_delete_success: SimpleSignal
-    @Signal("messaging_token_delete_failure") var token_delete_failure: SignalWithArguments<String>
+    @Signal("token") var token_received: SignalWithArguments<String>
+    @Signal("message") var token_error: SignalWithArguments<String>
+    @Signal("data") var notification_received: SignalWithArguments<GDictionary>
+    @Signal("data") var notification_opened: SignalWithArguments<GDictionary>
+    @Signal("granted") var permission_result: SignalWithArguments<Bool>
+    @Signal("topic") var topic_subscribe_success: SignalWithArguments<String>
+    @Signal("message") var topic_subscribe_failure: SignalWithArguments<String>
+    @Signal("topic") var topic_unsubscribe_success: SignalWithArguments<String>
+    @Signal("message") var topic_unsubscribe_failure: SignalWithArguments<String>
+    @Signal var token_delete_success: SimpleSignal
+    @Signal("message") var token_delete_failure: SignalWithArguments<String>
 
 
     private var isConfigured = false
@@ -78,11 +159,6 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
         UNUserNotificationCenter.current().delegate = notificationDelegateHelper
         log("UNUserNotificationCenter delegate attached; previous delegate=\(String(describing: previousDelegate))")
 
-        DispatchQueue.main.async {
-            self.log("calling UIApplication.registerForRemoteNotifications()")
-            UIApplication.shared.registerForRemoteNotifications()
-        }
-
         NotificationCenter.default.addObserver(forName: NSNotification.Name("GodotDidRegisterForRemoteNotificationsWithDeviceToken"), object: nil, queue: .main) { [weak self] notification in
             guard let self = self, let deviceToken = notification.userInfo?["deviceToken"] as? Data else { return }
             self.log("received Godot APNs device-token notification; bytes=\(deviceToken.count)")
@@ -96,6 +172,18 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
                     self.token_received.emit(token)
                 }
             }
+        }
+
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("GodotDidFailToRegisterForRemoteNotifications"), object: nil, queue: .main) { [weak self] notification in
+            guard let self else { return }
+            let message = notification.userInfo?["error"] as? String ?? "unknown error"
+            self.log("APNs registration failed: \(message)")
+        }
+
+        DispatchQueue.main.async {
+            APNsRegistrationInterceptor.install()
+            self.log("calling UIApplication.registerForRemoteNotifications()")
+            UIApplication.shared.registerForRemoteNotifications()
         }
 
         logTokenState("after configure")
@@ -186,7 +274,7 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
                 if let error {
                     self.token_delete_failure.emit(error.localizedDescription)
                 } else {
-                    self.messaging_token_delete_success.emit()
+                    self.token_delete_success.emit()
                 }
             }
         }
