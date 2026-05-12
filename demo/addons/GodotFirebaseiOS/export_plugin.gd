@@ -75,7 +75,7 @@ class iOSExportPlugin extends EditorExportPlugin:
 
 	func _make_fcm_plist() -> String:
 		return """<key>FirebaseAppDelegateProxyEnabled</key>
-<false/>
+<true/>
 <key>UIBackgroundModes</key>
 <array>
 	<string>remote-notification</string>
