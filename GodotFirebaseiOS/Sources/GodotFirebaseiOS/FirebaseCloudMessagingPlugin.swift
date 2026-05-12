@@ -49,6 +49,18 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
             UIApplication.shared.registerForRemoteNotifications()
         }
 
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("GodotDidRegisterForRemoteNotificationsWithDeviceToken"), object: nil, queue: .main) { [weak self] notification in
+            guard let self = self, let deviceToken = notification.userInfo?["deviceToken"] as? Data else { return }
+            Messaging.messaging().apnsToken = deviceToken
+            
+            // Speed up the first token fetch after APNS handover
+            Messaging.messaging().token { token, _ in
+                if let token = token {
+                    self.token_received.emit(token)
+                }
+            }
+        }
+
         isConfigured = true
         #endif
     }
