@@ -58,3 +58,7 @@ func subscribe_to_topic(topic: String) -> void:
 func unsubscribe_from_topic(topic: String) -> void:
 	if _plugin:
 		_plugin.messagingUnsubscribeFromTopic(topic)
+
+func set_auto_init_enabled(enabled: bool) -> void:
+	if _plugin:
+		_plugin.messagingSetAutoInitEnabled(enabled)

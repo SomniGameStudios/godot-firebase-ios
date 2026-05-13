@@ -328,6 +328,16 @@ class FirebaseCloudMessagingPlugin: RefCounted, @unchecked Sendable {
         #endif
     }
 
+    // MARK: - Auto Init
+
+    @Callable
+    func messagingSetAutoInitEnabled(_ enabled: Bool) {
+        #if os(iOS)
+        Messaging.messaging().isAutoInitEnabled = enabled
+        log("auto-init set to \(enabled)")
+        #endif
+    }
+
     // MARK: - Payload Extraction
 
     fileprivate func extractPayload(_ userInfo: [AnyHashable: Any]) -> GDictionary {

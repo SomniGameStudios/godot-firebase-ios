@@ -56,4 +56,3 @@ func _ready() -> void:
 		var _messaging_plugin := ClassDB.instantiate(&"FirebaseCloudMessagingPlugin")
 		messaging._plugin = _messaging_plugin
 		messaging._connect_signals()
-		messaging.configure()
