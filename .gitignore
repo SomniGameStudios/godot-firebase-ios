@@ -19,6 +19,9 @@ GoogleService-Info.plist
 
 # Compiled framework (distributed via GitHub Releases)
 demo/addons/GodotFirebaseiOS/GodotFirebaseiOS.framework
+demo/addons/GodotFirebaseiOS/GodotFirebaseiOS.xcframework
+demo/addons/GodotFirebaseiOS/GodotFirebaseiOS.framework.dSYM
+
 
 # MSVC build artifacts
 *.obj

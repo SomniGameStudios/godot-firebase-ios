@@ -7,6 +7,7 @@ var auth := preload("res://addons/GodotFirebaseiOS/modules/Auth.gd").new()
 var firestore := preload("res://addons/GodotFirebaseiOS/modules/Firestore.gd").new()
 var remote_config := preload("res://addons/GodotFirebaseiOS/modules/RemoteConfig.gd").new()
 var analytics := preload("res://addons/GodotFirebaseiOS/modules/Analytics.gd").new()
+var messaging := preload("res://addons/GodotFirebaseiOS/modules/Messaging.gd").new()
 var rtdb := preload("res://addons/GodotFirebaseiOS/modules/RealtimeDB.gd").new()
 
 func _ready() -> void:
@@ -51,7 +52,13 @@ func _ready() -> void:
 		analytics._plugin = _analytics_plugin
 		analytics._connect_signals()
 
-	# 6. Realtime Database module
+	# 6. Cloud Messaging module
+	if ClassDB.class_exists(&"FirebaseCloudMessagingPlugin"):
+		var _messaging_plugin := ClassDB.instantiate(&"FirebaseCloudMessagingPlugin")
+		messaging._plugin = _messaging_plugin
+		messaging._connect_signals()
+
+	# 7. Realtime Database module
 	if ClassDB.class_exists(&"FirebaseDatabasePlugin"):
 		var _rtdb_plugin := ClassDB.instantiate(&"FirebaseDatabasePlugin")
 		rtdb._plugin = _rtdb_plugin
