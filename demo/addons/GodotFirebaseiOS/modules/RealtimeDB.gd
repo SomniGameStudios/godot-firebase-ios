@@ -8,7 +8,7 @@ signal db_value_changed(path: String, data: Dictionary)
 
 var _plugin: Object
 
-func _connect_signals():
+func _connect_signals() -> void:
 	if not _plugin:
 		return
 	_plugin.connect("realtime_write_task_completed", write_task_completed.emit)

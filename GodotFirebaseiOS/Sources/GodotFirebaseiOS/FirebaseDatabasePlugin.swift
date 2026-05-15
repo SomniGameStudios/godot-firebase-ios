@@ -105,7 +105,7 @@ class FirebaseDatabasePlugin: RefCounted, @unchecked Sendable {
     @Callable
     func listen_to_path(path: String) {
         guard let ref = ref else { return }
-        if listeners[path] != nil { return }
+        stop_listening(path: path)
         
         let handle = ref.child(path).observe(.value) { [weak self] snapshot in
             guard let self else { return }
@@ -122,6 +122,14 @@ class FirebaseDatabasePlugin: RefCounted, @unchecked Sendable {
         guard let ref = ref, let handle = listeners[path] else { return }
         ref.child(path).removeObserver(withHandle: handle)
         listeners.removeValue(forKey: path)
+    }
+
+    deinit {
+        if let ref = ref {
+            for (path, handle) in listeners {
+                ref.child(path).removeObserver(withHandle: handle)
+            }
+        }
     }
 
     // MARK: - Increment Helper (Parity with Firestore increment)

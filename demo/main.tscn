@@ -73,6 +73,18 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 36
 text = "Cloud Messaging"
 
+[node name="RTDBButton" type="Button" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Realtime Database"
+
+[node name="RTDBQuickButton" type="Button" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "RTDB Quick Test"
+
 [node name="ComingSoon" type="Label" parent="MarginContainer/VBoxContainer" unique_id=793478508]
 text = "More services coming soon..."
 
@@ -81,3 +93,5 @@ text = "More services coming soon..."
 [connection signal="pressed" from="MarginContainer/VBoxContainer/RemoteConfigButton" to="." method="_on_remote_config_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/AnalyticsButton" to="." method="_on_analytics_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/MessagingButton" to="." method="_on_messaging_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/RTDBButton" to="." method="_on_rtdb_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/RTDBQuickButton" to="." method="_on_rtdb_quick_pressed"]
