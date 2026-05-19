@@ -26,6 +26,7 @@ let package = Package(
                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS")
             ],
             swiftSettings: [
+                .swiftLanguageMode(.v5),
                 .unsafeFlags([
                     "-suppress-warnings",
                     "-Xfrontend", "-internalize-at-link",
