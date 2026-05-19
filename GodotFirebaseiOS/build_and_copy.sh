@@ -38,8 +38,8 @@ xcodebuild \
 
 echo "📋 Locating built frameworks..."
 FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
-DSYM_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/GodotFirebaseiOS.framework.dSYM"
 XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
+DSYM_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework.dSYM"
 
 if [ ! -d "$FRAMEWORK_SOURCE" ]; then
   echo "❌ Error: Framework not found at $FRAMEWORK_SOURCE"
