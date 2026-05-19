@@ -422,7 +422,7 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
             return snapshot.data()
         }) { [weak self] result, error in
             guard let self else { return }
-            nonisolated(unsafe) let capturedData = result as? [String: Any]
+            let capturedData = result as? [String: Any]
             let errorDescription = error?.localizedDescription
             Task { @MainActor in
                 if let errorDescription {

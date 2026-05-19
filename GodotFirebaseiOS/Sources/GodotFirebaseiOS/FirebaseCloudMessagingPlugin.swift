@@ -14,9 +14,9 @@ private final class APNsRegistrationInterceptor {
     private typealias DidRegisterIMP = @convention(c) (AnyObject, Selector, UIApplication, Data) -> Void
     private typealias DidFailIMP = @convention(c) (AnyObject, Selector, UIApplication, NSError) -> Void
 
-    private nonisolated(unsafe) static var installedClassIds = Set<ObjectIdentifier>()
-    private nonisolated(unsafe) static var originalDidRegisterImplementations: [ObjectIdentifier: IMP] = [:]
-    private nonisolated(unsafe) static var originalDidFailImplementations: [ObjectIdentifier: IMP] = [:]
+    private static var installedClassIds = Set<ObjectIdentifier>()
+    private static var originalDidRegisterImplementations: [ObjectIdentifier: IMP] = [:]
+    private static var originalDidFailImplementations: [ObjectIdentifier: IMP] = [:]
 
     static func install() {
         guard let delegate = UIApplication.shared.delegate else {

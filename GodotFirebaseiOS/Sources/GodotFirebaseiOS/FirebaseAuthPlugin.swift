@@ -67,7 +67,6 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             return
         }
         Auth.auth().signInAnonymously { [weak self] result, error in
-            nonisolated(unsafe) let safeResult = result
             guard let self else { return }
             Task { @MainActor in
                 if let error {
@@ -75,7 +74,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                     self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
                     return
                 }
-                guard let user = safeResult?.user else { return }
+                guard let user = result?.user else { return }
                 self.auth_success.emit(self.userToDict(user))
             }
         }
@@ -90,7 +89,6 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             return
         }
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
-            nonisolated(unsafe) let safeResult = result
             guard let self else { return }
             Task { @MainActor in
                 if let error {
@@ -98,7 +96,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                     self.create_user_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
                     return
                 }
-                guard let user = safeResult?.user else { return }
+                guard let user = result?.user else { return }
                 self.create_user_success.emit(self.userToDict(user))
             }
         }
@@ -111,7 +109,6 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             return
         }
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
-            nonisolated(unsafe) let safeResult = result
             guard let self else { return }
             Task { @MainActor in
                 if let error {
@@ -119,7 +116,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                     self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
                     return
                 }
-                guard let user = safeResult?.user else { return }
+                guard let user = result?.user else { return }
                 self.auth_success.emit(self.userToDict(user))
             }
         }
@@ -153,23 +150,21 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             return
         }
         performGoogleSignIn { [weak self] credential, error in
-            nonisolated(unsafe) let safeCredential = credential
             guard let self else { return }
             if let error {
                 Task { @MainActor in self.auth_failure.emit(error) }
                 return
             }
-            guard let credential = safeCredential else { return }
-            Auth.auth().signIn(with: safeCredential!) { [weak self] result, error in
-            nonisolated(unsafe) let safeResult = result
-            guard let self else { return }
+            guard let credential else { return }
+            Auth.auth().signIn(with: credential) { [weak self] result, error in
+                guard let self else { return }
                 Task { @MainActor in
                     if let error {
                         let nsError = error as NSError
                         self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
                         return
                     }
-                    guard let user = safeResult?.user else { return }
+                    guard let user = result?.user else { return }
                     self.auth_success.emit(self.userToDict(user))
                 }
             }
@@ -186,25 +181,22 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             link_with_google_failure.emit("No user signed in")
             return
         }
-        nonisolated(unsafe) let safeCurrentUser = currentUser
         performGoogleSignIn { [weak self] credential, error in
-            nonisolated(unsafe) let safeCredential = credential
             guard let self else { return }
             if let error {
                 Task { @MainActor in self.link_with_google_failure.emit(error) }
                 return
             }
-            guard let credential = safeCredential else { return }
-            safeCurrentUser.link(with: safeCredential!) { [weak self] result, error in
-            nonisolated(unsafe) let safeResult = result
-            guard let self else { return }
+            guard let credential else { return }
+            currentUser.link(with: credential) { [weak self] result, error in
+                guard let self else { return }
                 Task { @MainActor in
                     if let error {
                         let nsError = error as NSError
                         self.link_with_google_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
                         return
                     }
-                    guard let user = safeResult?.user else { return }
+                    guard let user = result?.user else { return }
                     self.link_with_google_success.emit(self.userToDict(user))
                 }
             }
@@ -220,24 +212,22 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             return
         }
         performAppleSignIn { [weak self] credential, error in
-            nonisolated(unsafe) let safeCredential = credential
             guard let self else { return }
             self.appleSignInHelper = nil
             if let error {
                 Task { @MainActor in self.auth_failure.emit(error) }
                 return
             }
-            guard let credential = safeCredential else { return }
-            Auth.auth().signIn(with: safeCredential!) { [weak self] result, error in
-            nonisolated(unsafe) let safeResult = result
-            guard let self else { return }
+            guard let credential else { return }
+            Auth.auth().signIn(with: credential) { [weak self] result, error in
+                guard let self else { return }
                 Task { @MainActor in
                     if let error {
                         let nsError = error as NSError
                         self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
                         return
                     }
-                    guard let user = safeResult?.user else { return }
+                    guard let user = result?.user else { return }
                     self.auth_success.emit(self.userToDict(user))
                 }
             }
@@ -254,26 +244,23 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             link_with_apple_failure.emit("No user signed in")
             return
         }
-        nonisolated(unsafe) let safeCurrentUser = currentUser
         performAppleSignIn { [weak self] credential, error in
-            nonisolated(unsafe) let safeCredential = credential
             guard let self else { return }
             self.appleSignInHelper = nil
             if let error {
                 Task { @MainActor in self.link_with_apple_failure.emit(error) }
                 return
             }
-            guard let credential = safeCredential else { return }
-            safeCurrentUser.link(with: safeCredential!) { [weak self] result, error in
-            nonisolated(unsafe) let safeResult = result
-            guard let self else { return }
+            guard let credential else { return }
+            currentUser.link(with: credential) { [weak self] result, error in
+                guard let self else { return }
                 Task { @MainActor in
                     if let error {
                         let nsError = error as NSError
                         self.link_with_apple_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
                         return
                     }
-                    guard let user = safeResult?.user else { return }
+                    guard let user = result?.user else { return }
                     self.link_with_apple_success.emit(self.userToDict(user))
                 }
             }
@@ -339,10 +326,9 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         }
         if authStateHandle != nil { return }
         authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            nonisolated(unsafe) let safeUser = user
             guard let self else { return }
             Task { @MainActor in
-                if let user = safeUser {
+                if let user {
                     self.auth_state_changed.emit(true, self.userToDict(user))
                 } else {
                     self.auth_state_changed.emit(false, GDictionary())
@@ -499,7 +485,6 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             return
         }
         user.unlink(fromProvider: providerId) { [weak self] updatedUser, error in
-            nonisolated(unsafe) let safeUpdatedUser = updatedUser
             guard let self else { return }
             Task { @MainActor in
                 if let error {
@@ -507,7 +492,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                     self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
                     return
                 }
-                if let updatedUser = safeUpdatedUser {
+                if let updatedUser {
                     self.auth_success.emit(self.userToDict(updatedUser))
                 } else {
                     self.auth_failure.emit("User became nil after unlinking provider")
@@ -528,7 +513,6 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         }
         let credential = EmailAuthProvider.credential(withEmail: email, password: password)
         user.reauthenticate(with: credential) { [weak self] result, error in
-            nonisolated(unsafe) let safeResult = result
             guard let self else { return }
             Task { @MainActor in
                 if let error {
@@ -536,7 +520,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                     self.auth_failure.emit("[\(nsError.code)] \(error.localizedDescription)")
                     return
                 }
-                if let user = safeResult?.user {
+                if let user = result?.user {
                     self.auth_success.emit(self.userToDict(user))
                 } else {
                     self.auth_failure.emit("User became nil after reauthentication")
@@ -547,7 +531,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 
     // MARK: - Private Helpers
 
-    private func performGoogleSignIn(completion: @escaping @Sendable (AuthCredential?, String?) -> Void) {
+    private func performGoogleSignIn(completion: @escaping (AuthCredential?, String?) -> Void) {
         #if os(iOS)
         guard let clientID = FirebaseApp.app()?.options.clientID else {
             completion(nil, "Missing Firebase clientID")
@@ -556,9 +540,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
 
-        nonisolated(unsafe) let safeCompletion = completion
         DispatchQueue.main.async {
-            let completion = safeCompletion
             guard let rootVC = self.topMostViewController() else {
                 completion(nil, "Could not find root view controller")
                 return
@@ -584,7 +566,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         #endif
     }
 
-    private func performAppleSignIn(completion: @escaping @Sendable (AuthCredential?, String?) -> Void) {
+    private func performAppleSignIn(completion: @escaping (AuthCredential?, String?) -> Void) {
         #if os(iOS)
         let nonce = randomNonceString()
         let hashedNonce = sha256(nonce)
@@ -594,9 +576,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         request.requestedScopes = [.fullName, .email]
         request.nonce = hashedNonce
 
-        nonisolated(unsafe) let safeCompletion = completion
         DispatchQueue.main.async {
-            let completion = safeCompletion
             guard let window = self.topMostViewController()?.view.window else {
                 completion(nil, "Could not find presenting window for Apple Sign-In")
                 return
@@ -708,7 +688,7 @@ class AppleSignInHelper: NSObject, ASAuthorizationControllerDelegate, ASAuthoriz
     private let rawNonce: String
     private let completion: (AuthCredential?, String?) -> Void
 
-    init(window: UIWindow, rawNonce: String, completion: @escaping @Sendable (AuthCredential?, String?) -> Void) {
+    init(window: UIWindow, rawNonce: String, completion: @escaping (AuthCredential?, String?) -> Void) {
         self.window = window
         self.rawNonce = rawNonce
         self.completion = completion
