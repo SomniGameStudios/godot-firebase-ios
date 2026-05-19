@@ -34,7 +34,7 @@ xcodebuild \
   -skipMacroValidation \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
-  DEBUG_INFORMATION_FORMAT="dwarf-with-dsym" || true
+  DEBUG_INFORMATION_FORMAT="dwarf-with-dsym"
 
 echo "📋 Locating built frameworks..."
 FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
