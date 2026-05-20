@@ -15,3 +15,8 @@ android.debug.arm64 = "stubs/libstub_android.so"
 android.release.arm64 = "stubs/libstub_android.so"
 android.debug.x86_64 = "stubs/libstub_android.so"
 android.release.x86_64 = "stubs/libstub_android.so"
+
+[dependencies]
+ios = {
+    "SwiftGodotRuntime.xcframework": ""
+}

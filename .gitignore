@@ -38,3 +38,4 @@ compile_log.txt
 # IDE
 .idea/
 /.claude
+demo/addons/GodotFirebaseiOS/SwiftGodotRuntime.xcframework
