@@ -2,7 +2,7 @@
 
 Firebase plugin for Godot 4 on iOS, implemented as a [GDExtension](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/what_is_gdextension.html) using [SwiftGodot](https://github.com/migueldeicaza/SwiftGodot) — similar in approach to [GodotApplePlugins](https://github.com/migueldeicaza/GodotApplePlugins).
 
-Designed to work alongside [GodotFirebaseAndroid](https://github.com/syntaxerror247/GodotFirebaseAndroid), exposing the same API on both platforms for a consistent cross-platform experience.
+Designed to work alongside [godot-firebase-android](https://github.com/SomniGameStudios/godot-firebase-android), exposing the same API on both platforms for a consistent cross-platform experience.
 
 ---
 
