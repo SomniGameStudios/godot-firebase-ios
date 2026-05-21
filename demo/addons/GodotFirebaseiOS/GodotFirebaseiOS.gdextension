@@ -18,5 +18,5 @@ android.release.x86_64 = "stubs/libstub_android.so"
 
 [dependencies]
 ios = {
-    "SwiftGodotRuntime.xcframework": ""
+    "res://addons/GodotApplePluginsRuntime/bin/SwiftGodotRuntime.xcframework": ""
 }

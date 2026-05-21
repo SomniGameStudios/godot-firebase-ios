@@ -21,8 +21,11 @@ Designed to work alongside [GodotFirebaseAndroid](https://github.com/syntaxerror
 
 1. Download the latest release zip from [Releases](https://github.com/SomniGameStudios/godot-firebase-ios/releases).
 2. Extract `addons/GodotFirebaseiOS/` into your project's `addons/` folder.
-3. Enable the plugin in **Project → Project Settings → Plugins**. The `FirebaseIOS` autoload is registered automatically.
-4. Place your `GoogleService-Info.plist` in `addons/GodotFirebaseiOS/`.
+3. Install the shared SwiftGodot runtime: download [GodotApplePlugins](https://github.com/migueldeicaza/GodotApplePlugins/releases) and extract its `addons/GodotApplePluginsRuntime/` into your project's `addons/` folder. This plugin depends on it for the iOS export and does not bundle its own copy.
+4. Enable the plugin in **Project → Project Settings → Plugins**. The `FirebaseIOS` autoload is registered automatically.
+5. Place your `GoogleService-Info.plist` in `addons/GodotFirebaseiOS/`.
+
+> **Version match:** this plugin and `GodotApplePluginsRuntime` must be built against the same SwiftGodot revision, or the iOS app will crash at launch with Swift symbol errors. See the [README](https://github.com/SomniGameStudios/godot-firebase-ios#dependencies) for the pinned revision.
 
 ## Requirements
 
