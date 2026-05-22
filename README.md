@@ -50,6 +50,28 @@ Full installation guide, API reference, and examples.
 
 ---
 
+## Dependencies
+
+This plugin does **not** bundle the SwiftGodot runtime. It depends on the shared
+`SwiftGodotRuntime` framework provided by the
+[`GodotApplePluginsRuntime`](https://github.com/migueldeicaza/GodotApplePlugins)
+addon.
+
+Install `GodotApplePluginsRuntime` into your project's `addons/` folder
+alongside this plugin — even if you do not use any other GodotApplePlugins
+addon. The `.gdextension` manifest declares it as a native iOS dependency at
+`res://addons/GodotApplePluginsRuntime/bin/SwiftGodotRuntime.xcframework`, so
+Godot embeds it in the iOS export.
+
+Both this plugin and the `GodotApplePluginsRuntime` build must be compiled
+against the **same SwiftGodot revision**, or the iOS app will fail to launch
+with Swift symbol-not-found errors. This plugin is pinned to the SwiftGodot
+revision in [`GodotFirebaseiOS/Package.swift`](GodotFirebaseiOS/Package.swift)
+(currently `ead7bffc9546c1740678a36096282e1a811b7da6`). Use a
+`GodotApplePluginsRuntime` release built from the same revision.
+
+---
+
 ## Requirements
 
 | Tool | Minimum |
