@@ -34,20 +34,15 @@ xcodebuild \
   -skipMacroValidation \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
-  DEBUG_INFORMATION_FORMAT="dwarf-with-dsym"
+  DEBUG_INFORMATION_FORMAT="dwarf" || true
 
 echo "📋 Locating built frameworks..."
 FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
 XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
-DSYM_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework.dSYM"
 
 if [ ! -d "$FRAMEWORK_SOURCE" ]; then
   echo "❌ Error: Framework not found at $FRAMEWORK_SOURCE"
   exit 1
-fi
-
-if [ ! -d "$DSYM_SOURCE" ]; then
-  echo "⚠️ Warning: dSYM not found at $DSYM_SOURCE. Archive warnings may persist."
 fi
 
 # --- Create Simulator Stub ---
@@ -128,18 +123,10 @@ echo "📦 Creating XCFramework..."
 rm -rf "$XCFRAMEWORK_OUT"
 
 # Plugin XCFramework containing both physical device framework and simulator stub framework
-if [ -d "$DSYM_SOURCE" ]; then
-  xcodebuild -create-xcframework \
-    -framework "$FRAMEWORK_SOURCE" \
-    -debug-symbols "$(cd "$(dirname "$DSYM_SOURCE")" && pwd)/$(basename "$DSYM_SOURCE")" \
-    -framework "$SIM_FRAMEWORK_DIR" \
-    -output "$XCFRAMEWORK_OUT"
-else
-  xcodebuild -create-xcframework \
-    -framework "$FRAMEWORK_SOURCE" \
-    -framework "$SIM_FRAMEWORK_DIR" \
-    -output "$XCFRAMEWORK_OUT"
-fi
+xcodebuild -create-xcframework \
+  -framework "$FRAMEWORK_SOURCE" \
+  -framework "$SIM_FRAMEWORK_DIR" \
+  -output "$XCFRAMEWORK_OUT"
 
 # --- Addon Update ---
 
