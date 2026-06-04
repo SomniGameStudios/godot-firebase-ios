@@ -1,0 +1,39 @@
+name: GodotFirebaseiOS
+options:
+  bundleIdPrefix: godot.firebase.ios
+  minimumXcodeGenVersion: 2.34.0
+packages:
+  SwiftGodot:
+    url: https://github.com/migueldeicaza/SwiftGodot.git
+    revision: ead7bffc9546c1740678a36096282e1a811b7da6
+
+targets:
+  GodotFirebaseiOS:
+    type: framework
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Sources
+    dependencies:
+      - package: SwiftGodot
+        product: SwiftGodotRuntime
+    settings:
+      base:
+        PRODUCT_NAME: GodotFirebaseiOS
+        PRODUCT_MODULE_NAME: GodotFirebaseiOS
+        SWIFT_VERSION: "5.0"
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(SRCROOT)/../firebase_sdk/**"
+        OTHER_SWIFT_FLAGS:
+          - "-suppress-warnings"
+          - "-Xfrontend"
+          - "-internalize-at-link"
+          - "-Xfrontend"
+          - "-lto=llvm-full"
+          - "-Xfrontend"
+          - "-conditional-runtime-records"
+        OTHER_LDFLAGS:
+          - "$(inherited)"
+          - "-Wl,-undefined,dynamic_lookup"
+          - "-Xlinker"
+          - "-dead_strip"

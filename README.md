@@ -81,6 +81,28 @@ revision in [`GodotFirebaseiOS/Package.swift`](GodotFirebaseiOS/Package.swift)
 | iOS deployment target | 17+ |
 | macOS (build machine) | 14+ |
 
+## Development & Building
+
+To build the plugin from source, you need macOS with Xcode 15+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) installed.
+
+1. **Setup dependencies**:
+   ```bash
+   make setup
+   ```
+   This will download the required pre-built Firebase SDK binaries and generate the Xcode project `GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj`.
+
+2. **Build the framework**:
+   ```bash
+   make build
+   ```
+   This compiles the plugin for both iOS Device and iOS Simulator configurations, packages them into a universal `GodotFirebaseiOS.xcframework`, and copies the final GDExtension files and Firebase dependencies into the `demo/addons/GodotFirebaseiOS/` directory.
+
+3. **Vendor output into the main app project**:
+   Copy the compiled addon folder `demo/addons/GodotFirebaseiOS/` into your main Godot project's `addons/` directory:
+   ```bash
+   cp -R demo/addons/GodotFirebaseiOS/ <path-to-your-project>/addons/
+   ```
+
 ---
 
 ## License

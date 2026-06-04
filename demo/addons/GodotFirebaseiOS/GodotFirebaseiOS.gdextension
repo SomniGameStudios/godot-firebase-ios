@@ -18,5 +18,30 @@ android.release.x86_64 = "stubs/libstub_android.so"
 
 [dependencies]
 ios = {
-    "res://addons/GodotApplePluginsRuntime/bin/SwiftGodotRuntime.xcframework": ""
+    "res://addons/GodotApplePluginsRuntime/bin/SwiftGodotRuntime.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseAnalytics.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseAuth.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseCore.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseCoreInternal.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseDatabase.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseFirestore.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseInstallations.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseMessaging.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseRemoteConfig.xcframework": "",
+    "res://addons/GodotFirebaseiOS/FirebaseSharedSwift.xcframework": "",
+    "res://addons/GodotFirebaseiOS/GoogleAppMeasurement.xcframework": "",
+    "res://addons/GodotFirebaseiOS/GoogleAppMeasurementIdentitySupport.xcframework": "",
+    "res://addons/GodotFirebaseiOS/GoogleDataTransport.xcframework": "",
+    "res://addons/GodotFirebaseiOS/GoogleSignIn.xcframework": "",
+    "res://addons/GodotFirebaseiOS/GoogleUtilities.xcframework": "",
+    "res://addons/GodotFirebaseiOS/Promises.xcframework": "",
+    "res://addons/GodotFirebaseiOS/RecaptchaInterop.xcframework": "",
+    "res://addons/GodotFirebaseiOS/abseil.xcframework": "",
+    "res://addons/GodotFirebaseiOS/gRPC-C++.xcframework": "",
+    "res://addons/GodotFirebaseiOS/gRPC-Core.xcframework": "",
+    "res://addons/GodotFirebaseiOS/leveldb.xcframework": "",
+    "res://addons/GodotFirebaseiOS/nanopb.xcframework": "",
+    "res://addons/GodotFirebaseiOS/AppAuth.xcframework": "",
+    "res://addons/GodotFirebaseiOS/GTMAppAuth.xcframework": "",
+    "res://addons/GodotFirebaseiOS/GTMSessionFetcher.xcframework": ""
 }

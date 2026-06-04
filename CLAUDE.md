@@ -5,8 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build
 
 ```bash
-./GodotFirebaseiOS/build_and_copy.sh        # Debug
-./GodotFirebaseiOS/build_and_copy.sh r      # Release
+make setup          # Download Firebase SDK and generate Xcode project
+make build          # Build release xcframework and copy files to addon directory
+make clean          # Clean build files and downloaded SDKs
 ```
 
 Output framework is copied to `demo/addons/GodotFirebaseiOS/`. Requires macOS with Xcode 15+.
