@@ -72,7 +72,6 @@ build: setup-project
 		-derivedDataPath $(BUILD_DIR)/xcodebuild \
 		-skipPackagePluginValidation \
 		-skipMacroValidation \
-		BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
 		CODE_SIGNING_ALLOWED=NO \
 		CODE_SIGNING_REQUIRED=NO \
 		| tail -20
@@ -84,7 +83,6 @@ build: setup-project
 		-derivedDataPath $(BUILD_DIR)/xcodebuild \
 		-skipPackagePluginValidation \
 		-skipMacroValidation \
-		BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
 		CODE_SIGNING_ALLOWED=NO \
 		CODE_SIGNING_REQUIRED=NO \
 		| tail -20
