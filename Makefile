@@ -70,6 +70,8 @@ build: setup-project
 		-sdk iphoneos \
 		-configuration Release \
 		-derivedDataPath $(BUILD_DIR)/xcodebuild \
+		-skipPackagePluginValidation \
+		-skipMacroValidation \
 		BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
 		CODE_SIGNING_ALLOWED=NO \
 		CODE_SIGNING_REQUIRED=NO \
@@ -80,6 +82,8 @@ build: setup-project
 		-sdk iphonesimulator \
 		-configuration Release \
 		-derivedDataPath $(BUILD_DIR)/xcodebuild \
+		-skipPackagePluginValidation \
+		-skipMacroValidation \
 		BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
 		CODE_SIGNING_ALLOWED=NO \
 		CODE_SIGNING_REQUIRED=NO \
