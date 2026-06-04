@@ -30,8 +30,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-spm-
 
-      - name: Build and copy framework
-        run: ./GodotFirebaseiOS/build_and_copy.sh release
+      - name: Install XcodeGen
+        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install xcodegen
+
+      - name: Build release
+        run: make setup && make build
 
       - name: Package addon zip
         run: |
