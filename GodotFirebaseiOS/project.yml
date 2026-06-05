@@ -22,7 +22,6 @@ targets:
         PRODUCT_NAME: GodotFirebaseiOS
         PRODUCT_MODULE_NAME: GodotFirebaseiOS
         SWIFT_VERSION: "5.0"
-        BUILD_LIBRARY_FOR_DISTRIBUTION: YES
         FRAMEWORK_SEARCH_PATHS:
           - "$(SRCROOT)/../firebase_sdk/**"
         OTHER_SWIFT_FLAGS:
