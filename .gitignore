@@ -21,6 +21,11 @@ GoogleService-Info.plist
 demo/addons/GodotFirebaseiOS/GodotFirebaseiOS.framework
 demo/addons/GodotFirebaseiOS/GodotFirebaseiOS.xcframework
 demo/addons/GodotFirebaseiOS/GodotFirebaseiOS.framework.dSYM
+GodotFirebaseiOS.xcframework/
+
+# Firebase SDK downloaded frameworks
+firebase_sdk/
+demo/addons/GodotFirebaseiOS/*.xcframework/
 
 # Shared SwiftGodot runtime — third-party addon, install to run the demo (see README)
 demo/addons/GodotApplePluginsRuntime/

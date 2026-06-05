@@ -7,31 +7,41 @@ ADDON_DIR = $(ROOT_DIR)/demo/addons/GodotFirebaseiOS
 BUILD_DIR = $(ROOT_DIR)/GodotFirebaseiOS/.build
 
 FRAMEWORKS = \
+	AppAuth.xcframework \
+	AppCheckCore.xcframework \
+	FBLPromises.xcframework \
+	FirebaseABTesting.xcframework \
 	FirebaseAnalytics.xcframework \
+	FirebaseAppCheckInterop.xcframework \
+	FirebaseAuth.xcframework \
+	FirebaseAuthInterop.xcframework \
 	FirebaseCore.xcframework \
+	FirebaseCoreExtension.xcframework \
 	FirebaseCoreInternal.xcframework \
+	FirebaseDatabase.xcframework \
+	FirebaseFirestore.xcframework \
+	FirebaseFirestoreInternal.xcframework \
 	FirebaseInstallations.xcframework \
+	FirebaseMessaging.xcframework \
+	FirebaseMessagingInterop.xcframework \
+	FirebaseRemoteConfig.xcframework \
+	FirebaseRemoteConfigInterop.xcframework \
+	FirebaseSharedSwift.xcframework \
+	GTMAppAuth.xcframework \
+	GTMSessionFetcher.xcframework \
 	GoogleAppMeasurement.xcframework \
 	GoogleAppMeasurementIdentitySupport.xcframework \
 	GoogleDataTransport.xcframework \
-	GoogleUtilities.xcframework \
-	nanopb.xcframework \
-	Promises.xcframework \
-	FirebaseAuth.xcframework \
-	GTMSessionFetcher.xcframework \
-	RecaptchaInterop.xcframework \
-	FirebaseFirestore.xcframework \
-	abseil.xcframework \
-	gRPC-Core.xcframework \
-	gRPC-C++.xcframework \
-	leveldb.xcframework \
-	FirebaseDatabase.xcframework \
-	FirebaseRemoteConfig.xcframework \
-	FirebaseSharedSwift.xcframework \
-	FirebaseMessaging.xcframework \
 	GoogleSignIn.xcframework \
-	AppAuth.xcframework \
-	GTMAppAuth.xcframework
+	GoogleUtilities.xcframework \
+	RecaptchaInterop.xcframework \
+	absl.xcframework \
+	grpc.xcframework \
+	grpcpp.xcframework \
+	leveldb.xcframework \
+	nanopb.xcframework \
+	openssl_grpc.xcframework
+
 
 .PHONY: all setup setup-sdk setup-project build clean
 
@@ -44,8 +54,8 @@ setup-sdk:
 		echo "→ Downloading Firebase SDK $(FIREBASE_VERSION)..."; \
 		mkdir -p $(ROOT_DIR)/tmp_firebase_download; \
 		curl -L -o $(ROOT_DIR)/tmp_firebase_download/Firebase.zip $(FIREBASE_ZIP_URL); \
-		echo "→ Extracting Firebase SDK..."; \
-		unzip -q $(ROOT_DIR)/tmp_firebase_download/Firebase.zip -d $(ROOT_DIR)/tmp_firebase_download/extracted; \
+		unzip -oq $(ROOT_DIR)/tmp_firebase_download/Firebase.zip -d $(ROOT_DIR)/tmp_firebase_download/extracted; \
+		find $(ROOT_DIR)/tmp_firebase_download/extracted -name "Firebase-*-latest.zip" -exec unzip -oq {} -d $(ROOT_DIR)/tmp_firebase_download/extracted \; ; \
 		echo "→ Copying required frameworks to $(SDK_DIR)..."; \
 		mkdir -p $(SDK_DIR); \
 		for fw in $(FRAMEWORKS); do \
@@ -67,20 +77,22 @@ build: setup-project
 	@echo "→ Building GodotFirebaseiOS for iOS Device..."
 	@xcodebuild -project $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj \
 		-scheme GodotFirebaseiOS \
-		-sdk iphoneos \
+		-destination "generic/platform=iOS" \
 		-configuration Release \
 		-derivedDataPath $(BUILD_DIR)/xcodebuild \
-		BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+		-skipPackagePluginValidation \
+		-skipMacroValidation \
 		CODE_SIGNING_ALLOWED=NO \
 		CODE_SIGNING_REQUIRED=NO \
 		| tail -20
 	@echo "→ Building GodotFirebaseiOS for iOS Simulator..."
 	@xcodebuild -project $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj \
 		-scheme GodotFirebaseiOS \
-		-sdk iphonesimulator \
+		-destination "generic/platform=iOS Simulator" \
 		-configuration Release \
 		-derivedDataPath $(BUILD_DIR)/xcodebuild \
-		BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+		-skipPackagePluginValidation \
+		-skipMacroValidation \
 		CODE_SIGNING_ALLOWED=NO \
 		CODE_SIGNING_REQUIRED=NO \
 		| tail -20
