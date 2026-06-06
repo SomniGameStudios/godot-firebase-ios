@@ -102,6 +102,7 @@ targets:
           - "-conditional-runtime-records"
         OTHER_LDFLAGS:
           - "$(inherited)"
+          - "-ObjC"
           - "-Wl,-undefined,dynamic_lookup"
           - "-Xlinker"
           - "-dead_strip"
