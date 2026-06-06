@@ -70,7 +70,7 @@ setup-sdk:
 
 setup-project:
 	@echo "→ Generating Xcode project via XcodeGen..."
-	@xcodegen generate --spec $(ROOT_DIR)/GodotFirebaseiOS/project.yml --project $(ROOT_DIR)/GodotFirebaseiOS/
+	@PATH=/usr/local/bin:$$PATH xcodegen generate --spec $(ROOT_DIR)/GodotFirebaseiOS/project.yml --project $(ROOT_DIR)/GodotFirebaseiOS/
 	@echo "✓ Xcode project generated."
 
 build: setup-project
@@ -103,11 +103,25 @@ build: setup-project
 		-framework $(BUILD_DIR)/xcodebuild/Build/Products/Release-iphonesimulator/GodotFirebaseiOS.framework \
 		-output $(ROOT_DIR)/GodotFirebaseiOS.xcframework
 	@echo "→ Copying frameworks to addon directory..."
-	@rm -rf $(ADDON_DIR)/GodotFirebaseiOS.xcframework
-	@cp -R $(ROOT_DIR)/GodotFirebaseiOS.xcframework $(ADDON_DIR)/
+	@rm -rf $(ADDON_DIR)/frameworks
+	@mkdir -p $(ADDON_DIR)/frameworks
+	@touch $(ADDON_DIR)/frameworks/.gdignore
+	@cp -R $(ROOT_DIR)/GodotFirebaseiOS.xcframework $(ADDON_DIR)/frameworks/
+	@echo "→ Repackaging vendor frameworks (iOS-only)..."
 	@for fw in $(FRAMEWORKS); do \
-		rm -rf $(ADDON_DIR)/$$fw; \
-		cp -R $(SDK_DIR)/$$fw $(ADDON_DIR)/; \
+		fw_name=$$(echo $$fw | sed 's/.xcframework//'); \
+		device_fw="$(SDK_DIR)/$$fw/ios-arm64/$$fw_name.framework"; \
+		sim_fw="$(SDK_DIR)/$$fw/ios-arm64_x86_64-simulator/$$fw_name.framework"; \
+		if [ -d "$$device_fw" ] && [ -d "$$sim_fw" ]; then \
+			xcodebuild -create-xcframework \
+				-framework "$$device_fw" \
+				-framework "$$sim_fw" \
+				-output "$(ADDON_DIR)/frameworks/$$fw" \
+				2>/dev/null; \
+		else \
+			echo "  ⚠ Copying $$fw as-is (missing expected slices)"; \
+			cp -R $(SDK_DIR)/$$fw $(ADDON_DIR)/frameworks/; \
+		fi; \
 	done
 	@echo "✓ Build and update complete."
 
@@ -117,8 +131,5 @@ clean:
 	@rm -rf $(SDK_DIR)
 	@rm -rf $(ROOT_DIR)/GodotFirebaseiOS.xcframework
 	@rm -rf $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj
-	@for fw in $(FRAMEWORKS); do \
-		rm -rf $(ADDON_DIR)/$$fw; \
-	done
-	@rm -rf $(ADDON_DIR)/GodotFirebaseiOS.xcframework
+	@rm -rf $(ADDON_DIR)/frameworks
 	@echo "✓ Clean complete."

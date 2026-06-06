@@ -91,6 +91,7 @@ targets:
         PRODUCT_MODULE_NAME: GodotFirebaseiOS
         SWIFT_VERSION: "5.0"
         BUILD_LIBRARY_FOR_DISTRIBUTION: YES
+        GENERATE_INFOPLIST_FILE: YES
         OTHER_SWIFT_FLAGS:
           - "-suppress-warnings"
           - "-Xfrontend"
