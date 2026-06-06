@@ -26,6 +26,8 @@ GodotFirebaseiOS.xcframework/
 # Firebase SDK downloaded frameworks
 firebase_sdk/
 demo/addons/GodotFirebaseiOS/*.xcframework/
+demo/addons/GodotFirebaseiOS/frameworks/*
+!demo/addons/GodotFirebaseiOS/frameworks/.gdignore
 
 # Shared SwiftGodot runtime — third-party addon, install to run the demo (see README)
 demo/addons/GodotApplePluginsRuntime/
