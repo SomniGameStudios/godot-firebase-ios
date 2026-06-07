@@ -17,74 +17,11 @@ targets:
     dependencies:
       - package: SwiftGodot
         product: SwiftGodotRuntime
-      - framework: ../firebase_sdk/AppAuth.xcframework
-        embed: false
-      - framework: ../firebase_sdk/AppCheckCore.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FBLPromises.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseABTesting.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseAnalytics.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseAppCheckInterop.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseAuth.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseAuthInterop.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseCore.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseCoreExtension.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseCoreInternal.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseDatabase.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseFirestore.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseFirestoreInternal.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseInstallations.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseMessaging.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseMessagingInterop.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseRemoteConfig.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseRemoteConfigInterop.xcframework
-        embed: false
-      - framework: ../firebase_sdk/FirebaseSharedSwift.xcframework
-        embed: false
-      - framework: ../firebase_sdk/GTMAppAuth.xcframework
-        embed: false
-      - framework: ../firebase_sdk/GTMSessionFetcher.xcframework
-        embed: false
-      - framework: ../firebase_sdk/GoogleAppMeasurement.xcframework
-        embed: false
-      - framework: ../firebase_sdk/GoogleAppMeasurementIdentitySupport.xcframework
-        embed: false
-      - framework: ../firebase_sdk/GoogleDataTransport.xcframework
-        embed: false
-      - framework: ../firebase_sdk/GoogleSignIn.xcframework
-        embed: false
-      - framework: ../firebase_sdk/GoogleUtilities.xcframework
-        embed: false
-      - framework: ../firebase_sdk/RecaptchaInterop.xcframework
-        embed: false
-      - framework: ../firebase_sdk/absl.xcframework
-        embed: false
-      - framework: ../firebase_sdk/grpc.xcframework
-        embed: false
-      - framework: ../firebase_sdk/grpcpp.xcframework
-        embed: false
-      - framework: ../firebase_sdk/leveldb.xcframework
-        embed: false
-      - framework: ../firebase_sdk/nanopb.xcframework
-        embed: false
-      - framework: ../firebase_sdk/openssl_grpc.xcframework
-        embed: false
+        
+    postBuildScripts:
+      - script: |
+          find ../firebase_sdk -name "*.bundle" -exec cp -R {} "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/" \;
+        name: Copy Firebase Bundles
     settings:
       base:
         PRODUCT_NAME: GodotFirebaseiOS
@@ -92,6 +29,13 @@ targets:
         SWIFT_VERSION: "5.0"
         BUILD_LIBRARY_FOR_DISTRIBUTION: YES
         GENERATE_INFOPLIST_FILE: YES
+        CLANG_MODULES_AUTOLINK: NO
+        "FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]":
+          - "$(inherited)"
+          - "$(PROJECT_DIR)/../firebase_sdk/ios-arm64"
+        "FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]":
+          - "$(inherited)"
+          - "$(PROJECT_DIR)/../firebase_sdk/ios-arm64_x86_64-simulator"
         OTHER_SWIFT_FLAGS:
           - "-suppress-warnings"
           - "-Xfrontend"
@@ -100,6 +44,8 @@ targets:
           - "-lto=llvm-full"
           - "-Xfrontend"
           - "-conditional-runtime-records"
+          - "-Xfrontend"
+          - "-disable-all-autolinking"
         OTHER_LDFLAGS:
           - "$(inherited)"
           - "-ObjC"

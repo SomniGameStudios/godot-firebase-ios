@@ -50,8 +50,9 @@ all: build
 setup: setup-sdk setup-project
 
 setup-sdk:
-	@if [ ! -d "$(SDK_DIR)" ]; then \
+	@if [ ! -d "$(SDK_DIR)" ] || [ ! -d "$(SDK_DIR)/ios-arm64" ]; then \
 		echo "→ Downloading Firebase SDK $(FIREBASE_VERSION)..."; \
+		rm -rf $(SDK_DIR); \
 		mkdir -p $(ROOT_DIR)/tmp_firebase_download; \
 		curl -L -o $(ROOT_DIR)/tmp_firebase_download/Firebase.zip $(FIREBASE_ZIP_URL); \
 		unzip -oq $(ROOT_DIR)/tmp_firebase_download/Firebase.zip -d $(ROOT_DIR)/tmp_firebase_download/extracted; \
@@ -60,6 +61,14 @@ setup-sdk:
 		mkdir -p $(SDK_DIR); \
 		for fw in $(FRAMEWORKS); do \
 			find $(ROOT_DIR)/tmp_firebase_download/extracted -name "$$fw" -exec cp -R {} $(SDK_DIR)/ \; ; \
+		done; \
+		echo "→ Flattening framework slices..."; \
+		mkdir -p $(SDK_DIR)/ios-arm64; \
+		mkdir -p $(SDK_DIR)/ios-arm64_x86_64-simulator; \
+		for fw in $(FRAMEWORKS); do \
+			fw_name=$$(echo $$fw | sed 's/.xcframework//'); \
+			cp -R $(SDK_DIR)/$$fw/ios-arm64/$$fw_name.framework $(SDK_DIR)/ios-arm64/ 2>/dev/null || true; \
+			cp -R $(SDK_DIR)/$$fw/ios-arm64_x86_64-simulator/$$fw_name.framework $(SDK_DIR)/ios-arm64_x86_64-simulator/ 2>/dev/null || true; \
 		done; \
 		echo "→ Cleaning up temporary download files..."; \
 		rm -rf $(ROOT_DIR)/tmp_firebase_download; \
@@ -96,6 +105,9 @@ build: setup-project
 		CODE_SIGNING_ALLOWED=NO \
 		CODE_SIGNING_REQUIRED=NO \
 		| tail -20
+	@echo "→ Copying Firebase bundles into frameworks..."
+	@find $(SDK_DIR) -name "*.bundle" -exec cp -R {} $(BUILD_DIR)/xcodebuild/Build/Products/Release-iphoneos/GodotFirebaseiOS.framework/ \;
+	@find $(SDK_DIR) -name "*.bundle" -exec cp -R {} $(BUILD_DIR)/xcodebuild/Build/Products/Release-iphonesimulator/GodotFirebaseiOS.framework/ \;
 	@echo "→ Creating universal XCFramework..."
 	@rm -rf $(ROOT_DIR)/GodotFirebaseiOS.xcframework
 	@xcodebuild -create-xcframework \
