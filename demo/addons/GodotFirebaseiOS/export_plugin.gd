@@ -178,17 +178,43 @@ class iOSExportPlugin extends EditorExportPlugin:
 			device_flags += " -force_load \\\"$(PROJECT_DIR)/%s/frameworks/%s/ios-arm64/%s.framework/%s\\\"" % [project_name, fw, fw_name_no_ext, fw_name_no_ext]
 			simulator_flags += " -force_load \\\"$(PROJECT_DIR)/%s/frameworks/%s/ios-arm64_x86_64-simulator/%s.framework/%s\\\"" % [project_name, fw, fw_name_no_ext, fw_name_no_ext]
 
-		var target_str := "OTHER_LDFLAGS = \"$(LD_CLASSIC_$(XCODE_VERSION_ACTUAL)) -Wl,-U,_swift_entry_point -ObjC \";"
-		var replacement_str := "\"OTHER_LDFLAGS[sdk=iphoneos*]\" = \"$(LD_CLASSIC_$(XCODE_VERSION_ACTUAL)) -Wl,-U,_swift_entry_point -ObjC -rdynamic %s\";\n\t\t\t\t\"OTHER_LDFLAGS[sdk=iphonesimulator*]\" = \"$(LD_CLASSIC_$(XCODE_VERSION_ACTUAL)) -Wl,-U,_swift_entry_point -ObjC -rdynamic %s\";" % [device_flags, simulator_flags]
+		var regex := RegEx.new()
+		regex.compile("OTHER_LDFLAGS\\s*=\\s*(\\([^\\)]*\\)|\"[^\"]*\")\\s*;")
+		
+		var matches := regex.search_all(content)
+		if matches.is_empty():
+			push_warning("GodotFirebaseiOS: Could not find any OTHER_LDFLAGS pattern in project.pbxproj")
+			return
 
-		if content.contains(target_str):
-			content = content.replace(target_str, replacement_str)
-			var write_file := FileAccess.open(pbxproj_path, FileAccess.WRITE)
-			if write_file:
-				write_file.store_string(content)
-				write_file.close()
-				print("GodotFirebaseiOS: Successfully injected conditional force_load settings in project.pbxproj")
+		# Replace backwards to avoid index shifting
+		matches.reverse()
+		for m in matches:
+			var full_match := m.get_string(0)
+			var raw_flags := m.get_string(1).strip_edges()
+			
+			var original_flags := []
+			if raw_flags.begins_with("("):
+				var lines := raw_flags.substr(1, raw_flags.length() - 2).split("\n")
+				for line in lines:
+					var flag := line.strip_edges().replace("\"", "").replace(",", "")
+					if not flag.is_empty():
+						original_flags.append(flag)
 			else:
-				push_warning("GodotFirebaseiOS: Failed to open project.pbxproj for writing")
+				var clean_str := raw_flags.replace("\"", "")
+				for flag in clean_str.split(" "):
+					var trimmed := flag.strip_edges()
+					if not trimmed.is_empty():
+						original_flags.append(trimmed)
+
+			var original_flags_str := " ".join(original_flags)
+			var replacement_str := "\"OTHER_LDFLAGS[sdk=iphoneos*]\" = \"%s -rdynamic %s\";\n\t\t\t\t\"OTHER_LDFLAGS[sdk=iphonesimulator*]\" = \"%s -rdynamic %s\";" % [original_flags_str, device_flags, original_flags_str, simulator_flags]
+			
+			content = content.replace(full_match, replacement_str)
+
+		var write_file := FileAccess.open(pbxproj_path, FileAccess.WRITE)
+		if write_file:
+			write_file.store_string(content)
+			write_file.close()
+			print("GodotFirebaseiOS: Successfully injected conditional force_load settings in project.pbxproj")
 		else:
-			push_warning("GodotFirebaseiOS: Could not find OTHER_LDFLAGS pattern in project.pbxproj")
+			push_warning("GodotFirebaseiOS: Failed to open project.pbxproj for writing")
