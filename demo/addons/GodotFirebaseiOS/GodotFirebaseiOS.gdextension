@@ -20,3 +20,4 @@ android.release.x86_64 = "stubs/libstub_android.so"
 ios = {
     "res://addons/GodotApplePluginsRuntime/bin/SwiftGodotRuntime.xcframework": ""
 }
+
