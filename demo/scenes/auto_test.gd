@@ -75,10 +75,11 @@ func _test_auth() -> void:
 		_fail("is_signed_in false after sign-in")
 
 	_step("sign_out")
+	# sign_out() emits sign_out_success synchronously, so arm the listener first.
+	var out := _arm(auth.sign_out_success)
 	auth.sign_out()
-	var out: Variant = await _wait(auth.sign_out_success)
-	if out != null:
-		_pass("sign_out_success: %s" % str(out))
+	if await _settle(out):
+		_pass("sign_out_success: %s" % str(out["args"]))
 	else:
 		_fail("timed out waiting for sign_out_success")
 
@@ -121,6 +122,9 @@ func _test_rtdb() -> void:
 	if w == null:
 		_fail("set_value timeout")
 		return
+	if not _ok(w[0]):
+		_fail("set_value rejected: %s" % str(w[0]))
+		return
 	_pass("set_value ok")
 
 	_step("update_value (increment +5)")
@@ -128,6 +132,8 @@ func _test_rtdb() -> void:
 	var u: Variant = await _wait(rtdb.update_task_completed)
 	if u == null:
 		_fail("update_value timeout")
+	elif not _ok(u[0]):
+		_fail("update_value rejected: %s" % str(u[0]))
 	else:
 		_pass("update_value ok")
 
@@ -151,6 +157,8 @@ func _test_rtdb() -> void:
 	var d: Variant = await _wait(rtdb.delete_task_completed)
 	if d == null:
 		_fail("delete_value timeout")
+	elif not _ok(d[0]):
+		_fail("delete_value rejected: %s" % str(d[0]))
 	else:
 		rtdb.get_value(del_path)
 		var g2: Variant = await _wait(rtdb.get_task_completed)
@@ -241,11 +249,13 @@ func _test_remote_config() -> void:
 	_step("fetch_and_activate")
 	rc.fetch_and_activate()
 	var res := await _race(rc.activate_completed, rc.fetch_completed)
-	if res.index >= 0:
-		_pass("fetch/activate completed: %s" % str(res.args))
-	else:
+	if res.index < 0:
 		_fail("timed out waiting for fetch/activate")
 		return
+	if res.args.is_empty() or not _ok(res.args[0]):
+		_fail("fetch/activate reported failure: %s" % str(res.args))
+		return
+	_pass("fetch/activate completed: %s" % str(res.args))
 
 	_step("get_string(demo_flag)")
 	var val: String = rc.get_string("demo_flag")
@@ -294,6 +304,32 @@ func _make_handler(box: Dictionary, index: int) -> Callable:
 		elif a != null:
 			args = [a]
 		box["args"] = args
+
+# Connects a capturer BEFORE the triggering call, for natives that may emit
+# synchronously (e.g. Auth.sign_out). Pass the returned box to _settle().
+func _arm(sig: Signal) -> Dictionary:
+	var box := {"fired": false, "args": [], "sig": sig, "cb": Callable()}
+	box["cb"] = func(a = null, b = null) -> void:
+		if box["fired"]:
+			return
+		box["fired"] = true
+		if b != null:
+			box["args"] = [a, b]
+		elif a != null:
+			box["args"] = [a]
+	sig.connect(box["cb"])
+	return box
+
+# Waits up to timeout for an armed box to fire, then disconnects. Returns whether it fired.
+func _settle(box: Dictionary, timeout: float = TIMEOUT) -> bool:
+	if not box["fired"]:
+		var timer := get_tree().create_timer(timeout)
+		while not box["fired"] and timer.time_left > 0.0:
+			await get_tree().process_frame
+	var sig: Signal = box["sig"]
+	if sig.is_connected(box["cb"]):
+		sig.disconnect(box["cb"])
+	return box["fired"]
 
 func _delay(seconds: float) -> void:
 	await get_tree().create_timer(seconds).timeout
