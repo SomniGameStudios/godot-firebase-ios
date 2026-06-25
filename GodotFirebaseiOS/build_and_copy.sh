@@ -34,38 +34,44 @@ echo "🔨 Building GodotFirebaseiOS ($CONFIGURATION) for iOS..."
 cd "$SCRIPT_DIR"
 
 FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
+FRAMEWORK_BINARY="$FRAMEWORK_SOURCE/GodotFirebaseiOS"
 XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
 
-# Clean the prior device-framework output so the existence check below proves THIS
-# build produced it — otherwise a failed rebuild could ship a stale artifact.
-rm -rf "$FRAMEWORK_SOURCE"
-
-# The SwiftGodot 'Generator' host-tool target fails to link (a macOS object pulled into
-# an iOS build) and makes xcodebuild exit non-zero even when our framework target
-# succeeds. Capture the status instead of blanket-ignoring it, then require the framework
-# to actually exist below — so a real framework-target failure is NOT masked.
-set +e
-xcodebuild \
-  -scheme GodotFirebaseiOS \
-  -sdk iphoneos \
-  -configuration "$CONFIGURATION" \
-  -destination "generic/platform=iOS" \
-  -derivedDataPath "$BUILD_PATH" \
-  -skipPackagePluginValidation \
-  -skipMacroValidation \
-  CODE_SIGNING_ALLOWED=NO \
-  CODE_SIGNING_REQUIRED=NO \
-  DEBUG_INFORMATION_FORMAT="dwarf"
-BUILD_STATUS=$?
-set -e
+# SwiftGodot's 'Generator' host-tool target intermittently fails to resolve its SwiftSyntax
+# dependency when the scheme is built for an iOS destination (an explicit-module race on the
+# CI toolchain). That makes xcodebuild exit non-zero and can abort before our framework
+# binary is linked — but it is flaky, so a retry succeeds. Our framework target itself is
+# fine. So: build; if the framework BINARY is missing, retry. We tolerate a non-zero exit
+# only when the binary was actually produced (the Generator failure is benign in that case).
+MAX_ATTEMPTS=3
+BUILD_STATUS=0
+for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
+  echo "🔁 xcodebuild attempt $attempt/$MAX_ATTEMPTS..."
+  set +e
+  xcodebuild \
+    -scheme GodotFirebaseiOS \
+    -sdk iphoneos \
+    -configuration "$CONFIGURATION" \
+    -destination "generic/platform=iOS" \
+    -derivedDataPath "$BUILD_PATH" \
+    -skipPackagePluginValidation \
+    -skipMacroValidation \
+    CODE_SIGNING_ALLOWED=NO \
+    CODE_SIGNING_REQUIRED=NO \
+    DEBUG_INFORMATION_FORMAT="dwarf"
+  BUILD_STATUS=$?
+  set -e
+  [ -f "$FRAMEWORK_BINARY" ] && break
+  echo "⚠️  Framework binary missing after attempt $attempt (xcodebuild exited $BUILD_STATUS)."
+done
 
 echo "📋 Locating built frameworks..."
-if [ ! -d "$FRAMEWORK_SOURCE" ]; then
-  echo "❌ Error: Framework not found at $FRAMEWORK_SOURCE (xcodebuild exited $BUILD_STATUS)"
+if [ ! -f "$FRAMEWORK_BINARY" ]; then
+  echo "❌ Error: framework binary not found at $FRAMEWORK_BINARY after $MAX_ATTEMPTS attempts (last xcodebuild exit $BUILD_STATUS)"
   exit 1
 fi
 if [ "$BUILD_STATUS" -ne 0 ]; then
-  echo "⚠️  xcodebuild exited $BUILD_STATUS but the framework was produced (known-benign SwiftGodot 'Generator' host-tool link failure). Continuing."
+  echo "⚠️  xcodebuild exited $BUILD_STATUS; the framework binary was produced (benign SwiftGodot 'Generator' host-tool failure). Continuing."
 fi
 
 # NOTE: No PrivacyInfo.xcprivacy is embedded here. Privacy declaration is the
