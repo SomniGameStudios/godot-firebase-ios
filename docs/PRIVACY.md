@@ -14,11 +14,11 @@ missing required-reason API declaration).
 Godot generates the app's `PrivacyInfo.xcprivacy` from the **iOS export preset** privacy
 fields (Project → Export → iOS → Privacy). Set these so they cover Firebase:
 
-| Export preset field | Must cover (Apple reason) | Why |
+| Export preset field | Tick (Godot reason) | Why |
 |---|---|---|
-| `privacy/user_defaults_access_reasons` | `CA92.1`, `1C8F.1`, `C56D.1` | Firebase reads/writes `UserDefaults` |
-| `privacy/file_timestamp_access_reasons` | `C617.1` | Firebase reads file timestamps |
-| `privacy/system_boot_time_access_reasons` | `35F9.1` | Firebase reads system uptime |
+| User Defaults Access Reasons | `CA92.1` + `1C8F.1` | Firebase reads/writes `UserDefaults` (app + app-group). `C56D.1` is the SDK-*vendor* reason and does not apply once Firebase is statically linked into your app — Godot doesn't offer it, which is correct. |
+| File Timestamp Access Reasons | `C617.1` | Firebase reads file timestamps |
+| System Boot Time Access Reasons | `35F9.1` | Firebase reads system uptime |
 
 Then declare the data your app actually collects via Firebase under the preset's
 `privacy/collected_data/*` fields and `privacy/tracking_*`. For the modules this plugin
