@@ -34,6 +34,10 @@ window/handheld/orientation=1
 
 enabled=PackedStringArray("res://addons/GodotFirebaseiOS/plugin.cfg")
 
+[gui]
+
+common/default_scroll_deadzone=30
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
