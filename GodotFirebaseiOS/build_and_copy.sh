@@ -11,7 +11,6 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$SCRIPT_DIR/.."
 ADDON_PATH="$PROJECT_ROOT/demo/addons/GodotFirebaseiOS"
 BUILD_PATH="$SCRIPT_DIR/.build/xcodebuild"
-PRIVACY_MANIFEST="$SCRIPT_DIR/Resources/PrivacyInfo.xcprivacy"
 
 # Code-signing identity for the xcframework. Apple requires the *distributor* of a
 # repackaged third-party SDK to sign it (ITMS-91065), because we statically link
@@ -55,16 +54,10 @@ if [ ! -d "$FRAMEWORK_SOURCE" ]; then
   exit 1
 fi
 
-if [ ! -f "$PRIVACY_MANIFEST" ]; then
-  echo "❌ Error: Privacy manifest not found at $PRIVACY_MANIFEST"
-  exit 1
-fi
-
-# Embed the aggregate privacy manifest into the device framework. SwiftPM strips
-# Firebase's per-module PrivacyInfo.xcprivacy when it compiles Firebase from source
-# and static-links it here, so we re-supply the union (see Resources/PrivacyInfo.xcprivacy).
-echo "📝 Embedding PrivacyInfo.xcprivacy into device framework..."
-cp "$PRIVACY_MANIFEST" "$FRAMEWORK_SOURCE/PrivacyInfo.xcprivacy"
+# NOTE: No PrivacyInfo.xcprivacy is embedded here. Privacy declaration is the
+# consuming app's responsibility — the app's own privacy manifest must declare the
+# required-reason APIs that the statically-linked Firebase code uses (UserDefaults,
+# FileTimestamp, SystemBootTime) plus any data it collects. See docs/PRIVACY.md.
 
 # --- Create Simulator Stub ---
 
@@ -137,9 +130,6 @@ cat << 'EOF' > "$SIM_FRAMEWORK_DIR/Info.plist"
 </dict>
 </plist>
 EOF
-
-# Embed the same privacy manifest into the simulator slice for parity.
-cp "$PRIVACY_MANIFEST" "$SIM_FRAMEWORK_DIR/PrivacyInfo.xcprivacy"
 
 # --- Create XCFramework ---
 

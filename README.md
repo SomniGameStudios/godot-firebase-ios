@@ -91,8 +91,10 @@ via Swift Package Manager — there is no separate SDK download or XcodeGen step
    ./GodotFirebaseiOS/build_and_copy.sh release
    ```
    This compiles the plugin via SwiftPM with Firebase statically linked into a single
-   `GodotFirebaseiOS.xcframework` (device slice + simulator stub), embeds the aggregate
-   `PrivacyInfo.xcprivacy`, and copies the result into `demo/addons/GodotFirebaseiOS/`.
+   `GodotFirebaseiOS.xcframework` (device slice + simulator stub) and copies the result
+   into `demo/addons/GodotFirebaseiOS/`.
+
+   No privacy manifest is bundled — the consuming app declares privacy (see [docs/PRIVACY.md](docs/PRIVACY.md)).
 
    The framework is **unsigned** by default. The App Store requires the redistributor's
    signature on the statically-linked Firebase SDK (ITMS-91065) — this is applied by the

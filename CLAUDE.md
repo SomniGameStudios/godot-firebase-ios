@@ -9,8 +9,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 
 Firebase is resolved via SwiftPM (no separate SDK download / XcodeGen). The script builds a
-single `GodotFirebaseiOS.xcframework` with Firebase statically linked, embeds the aggregate
-`PrivacyInfo.xcprivacy`, and copies it to `demo/addons/GodotFirebaseiOS/`. Requires macOS with Xcode 15+.
+single `GodotFirebaseiOS.xcframework` with Firebase statically linked and copies it to
+`demo/addons/GodotFirebaseiOS/`. Requires macOS with Xcode 15+. No privacy manifest is
+bundled — privacy declaration is the consuming app's responsibility (see `docs/PRIVACY.md`).
 
 The framework ships **unsigned** — the consuming app re-signs the statically-linked Firebase SDK
 with its own distribution identity before archive (ITMS-91065). Pass `SIGN_IDENTITY="…"` to sign locally.
