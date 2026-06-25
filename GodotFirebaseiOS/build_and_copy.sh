@@ -11,6 +11,16 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$SCRIPT_DIR/.."
 ADDON_PATH="$PROJECT_ROOT/demo/addons/GodotFirebaseiOS"
 BUILD_PATH="$SCRIPT_DIR/.build/xcodebuild"
+PRIVACY_MANIFEST="$SCRIPT_DIR/Resources/PrivacyInfo.xcprivacy"
+
+# Code-signing identity for the xcframework. Apple requires the *distributor* of a
+# repackaged third-party SDK to sign it (ITMS-91065), because we statically link
+# Firebase (compiled from source) into this framework. App-level CodeSignOnCopy at
+# the host app's archive step is NOT sufficient. Pass any valid Apple-issued signing
+# identity (Apple Development is fine — the host app re-signs the binary for
+# distribution). Left empty here on purpose so no production identity is committed:
+#   SIGN_IDENTITY="Apple Development: you@example.com (TEAMID)" ./build_and_copy.sh release
+SIGN_IDENTITY="${SIGN_IDENTITY:-}"
 
 # Default to Debug, allow Release with 'r' or 'release' parameter
 CONFIGURATION="Debug"
@@ -44,6 +54,17 @@ if [ ! -d "$FRAMEWORK_SOURCE" ]; then
   echo "❌ Error: Framework not found at $FRAMEWORK_SOURCE"
   exit 1
 fi
+
+if [ ! -f "$PRIVACY_MANIFEST" ]; then
+  echo "❌ Error: Privacy manifest not found at $PRIVACY_MANIFEST"
+  exit 1
+fi
+
+# Embed the aggregate privacy manifest into the device framework. SwiftPM strips
+# Firebase's per-module PrivacyInfo.xcprivacy when it compiles Firebase from source
+# and static-links it here, so we re-supply the union (see Resources/PrivacyInfo.xcprivacy).
+echo "📝 Embedding PrivacyInfo.xcprivacy into device framework..."
+cp "$PRIVACY_MANIFEST" "$FRAMEWORK_SOURCE/PrivacyInfo.xcprivacy"
 
 # --- Create Simulator Stub ---
 
@@ -117,6 +138,9 @@ cat << 'EOF' > "$SIM_FRAMEWORK_DIR/Info.plist"
 </plist>
 EOF
 
+# Embed the same privacy manifest into the simulator slice for parity.
+cp "$PRIVACY_MANIFEST" "$SIM_FRAMEWORK_DIR/PrivacyInfo.xcprivacy"
+
 # --- Create XCFramework ---
 
 echo "📦 Creating XCFramework..."
@@ -127,6 +151,29 @@ xcodebuild -create-xcframework \
   -framework "$FRAMEWORK_SOURCE" \
   -framework "$SIM_FRAMEWORK_DIR" \
   -output "$XCFRAMEWORK_OUT"
+
+# --- Code Signing ---
+# Sign each framework slice (seals the binary + Info.plist + PrivacyInfo.xcprivacy),
+# then sign the xcframework bundle so its origin can be verified. Required to satisfy
+# App Store ITMS-91065 for the statically-linked Firebase SDK.
+if [ -n "$SIGN_IDENTITY" ]; then
+  echo "🔏 Signing xcframework with identity: $SIGN_IDENTITY"
+  for SLICE_FW in "$XCFRAMEWORK_OUT"/*/GodotFirebaseiOS.framework; do
+    echo "  • Signing $SLICE_FW"
+    codesign --force --timestamp --sign "$SIGN_IDENTITY" "$SLICE_FW"
+  done
+  echo "  • Signing $XCFRAMEWORK_OUT"
+  codesign --force --timestamp --sign "$SIGN_IDENTITY" "$XCFRAMEWORK_OUT"
+
+  echo "🔎 Verifying device-slice signature..."
+  codesign --verify --strict --verbose=2 "$XCFRAMEWORK_OUT/ios-arm64/GodotFirebaseiOS.framework"
+  codesign -dvv "$XCFRAMEWORK_OUT/ios-arm64/GodotFirebaseiOS.framework" 2>&1 | grep -E "Authority|TeamIdentifier|Identifier" || true
+else
+  echo "⚠️  SIGN_IDENTITY not set — xcframework is UNSIGNED."
+  echo "    The App Store will reject this build with ITMS-91065 (Missing signature)."
+  echo "    Re-run with a signing identity, e.g.:"
+  echo "      SIGN_IDENTITY=\"Apple Development: you@example.com (TEAMID)\" $0 $*"
+fi
 
 # --- Addon Update ---
 

@@ -5,12 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build
 
 ```bash
-make setup          # Download Firebase SDK and generate Xcode project
-make build          # Build release xcframework and copy files to addon directory
-make clean          # Clean build files and downloaded SDKs
+./GodotFirebaseiOS/build_and_copy.sh release   # Build the merged xcframework and copy to the addon
 ```
 
-Output framework is copied to `demo/addons/GodotFirebaseiOS/`. Requires macOS with Xcode 15+.
+Firebase is resolved via SwiftPM (no separate SDK download / XcodeGen). The script builds a
+single `GodotFirebaseiOS.xcframework` with Firebase statically linked, embeds the aggregate
+`PrivacyInfo.xcprivacy`, and copies it to `demo/addons/GodotFirebaseiOS/`. Requires macOS with Xcode 15+.
+
+The framework ships **unsigned** — the consuming app re-signs the statically-linked Firebase SDK
+with its own distribution identity before archive (ITMS-91065). Pass `SIGN_IDENTITY="…"` to sign locally.
 
 ## Run the Demo
 

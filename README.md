@@ -83,21 +83,26 @@ revision in [`GodotFirebaseiOS/Package.swift`](GodotFirebaseiOS/Package.swift)
 
 ## Development & Building
 
-To build the plugin from source, you need macOS with Xcode 15+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) installed.
+To build the plugin from source you need macOS with Xcode 15+. Firebase is resolved
+via Swift Package Manager — there is no separate SDK download or XcodeGen step.
 
-1. **Setup dependencies**:
+1. **Build the framework**:
    ```bash
-   make setup
+   ./GodotFirebaseiOS/build_and_copy.sh release
    ```
-   This will download the required pre-built Firebase SDK binaries and generate the Xcode project `GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj`.
+   This compiles the plugin via SwiftPM with Firebase statically linked into a single
+   `GodotFirebaseiOS.xcframework` (device slice + simulator stub), embeds the aggregate
+   `PrivacyInfo.xcprivacy`, and copies the result into `demo/addons/GodotFirebaseiOS/`.
 
-2. **Build the framework**:
+   The framework is **unsigned** by default. The App Store requires the redistributor's
+   signature on the statically-linked Firebase SDK (ITMS-91065) — this is applied by the
+   **consuming app** with its own distribution identity before archiving. To sign locally
+   for testing, pass an identity:
    ```bash
-   make build
+   SIGN_IDENTITY="Apple Development: you@example.com (TEAMID)" ./GodotFirebaseiOS/build_and_copy.sh release
    ```
-   This compiles the plugin for both iOS Device and iOS Simulator configurations, packages them into a universal `GodotFirebaseiOS.xcframework`, and copies the final GDExtension files and Firebase dependencies into the `demo/addons/GodotFirebaseiOS/` directory.
 
-3. **Vendor output into the main app project**:
+2. **Vendor output into the main app project**:
    Copy the compiled addon folder `demo/addons/GodotFirebaseiOS/` into your main Godot project's `addons/` directory:
    ```bash
    cp -R demo/addons/GodotFirebaseiOS/ <path-to-your-project>/addons/

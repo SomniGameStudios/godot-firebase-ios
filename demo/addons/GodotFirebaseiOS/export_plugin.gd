@@ -22,56 +22,13 @@ func _exit_tree() -> void:
 
 
 class iOSExportPlugin extends EditorExportPlugin:
-	const FRAMEWORKS_DIR := "res://addons/GodotFirebaseiOS/frameworks"
-
-	var _export_path := ""
-
-	const FIREBASE_FRAMEWORKS: PackedStringArray = [
-		"AppAuth.xcframework",
-		"AppCheckCore.xcframework",
-		"FBLPromises.xcframework",
-		"FirebaseABTesting.xcframework",
-		"FirebaseAnalytics.xcframework",
-		"FirebaseAppCheckInterop.xcframework",
-		"FirebaseAuth.xcframework",
-		"FirebaseAuthInterop.xcframework",
-		"FirebaseCore.xcframework",
-		"FirebaseCoreExtension.xcframework",
-		"FirebaseCoreInternal.xcframework",
-		"FirebaseDatabase.xcframework",
-		"FirebaseFirestore.xcframework",
-		"FirebaseFirestoreInternal.xcframework",
-		"FirebaseInstallations.xcframework",
-		"FirebaseMessaging.xcframework",
-		"FirebaseMessagingInterop.xcframework",
-		"FirebaseRemoteConfig.xcframework",
-		"FirebaseRemoteConfigInterop.xcframework",
-		"FirebaseSharedSwift.xcframework",
-		"GTMAppAuth.xcframework",
-		"GTMSessionFetcher.xcframework",
-		"GoogleAppMeasurement.xcframework",
-		"GoogleAppMeasurementIdentitySupport.xcframework",
-		"GoogleDataTransport.xcframework",
-		"GoogleSignIn.xcframework",
-		"GoogleUtilities.xcframework",
-		"RecaptchaInterop.xcframework",
-		"absl.xcframework",
-		"grpc.xcframework",
-		"grpcpp.xcframework",
-		"leveldb.xcframework",
-		"nanopb.xcframework",
-		"openssl_grpc.xcframework",
-	]
-
 	func _get_name() -> String:
 		return "GodotFirebaseiOS"
 
 	func _supports_platform(platform: EditorExportPlatform) -> bool:
 		return platform is EditorExportPlatformIOS
 
-	func _export_begin(features: PackedStringArray, _is_debug: bool, path: String, _flags: int) -> void:
-		_export_path = path
-		print("EXPORT FEATURES: ", features)
+	func _export_begin(features: PackedStringArray, _is_debug: bool, _path: String, _flags: int) -> void:
 		if not features.has("ios"):
 			return
 		const PLIST_PATH := "res://addons/GodotFirebaseiOS/GoogleService-Info.plist"
@@ -85,7 +42,6 @@ class iOSExportPlugin extends EditorExportPlugin:
 			return
 		add_ios_plist_content(_make_url_scheme_plist(reversed_client_id))
 		add_ios_plist_content(_make_fcm_plist())
-		add_ios_linker_flags("-ObjC")
 
 	func _extract_reversed_client_id(plist_path: String) -> String:
 		var parser := XMLParser.new()
@@ -126,95 +82,3 @@ class iOSExportPlugin extends EditorExportPlugin:
 </array>
 <key>FirebaseMessagingAutoInitEnabled</key>
 <false/>"""
-
-	func _export_end() -> void:
-		if _export_path.is_empty():
-			return
-		
-		var project_name := _export_path.get_file().get_basename()
-		var parent_dir := _export_path.get_base_dir()
-		var dest_dir := parent_dir.path_join(project_name).path_join("frameworks")
-		
-		var src_abs := ProjectSettings.globalize_path(FRAMEWORKS_DIR)
-		var dest_abs := ProjectSettings.globalize_path(dest_dir)
-		
-		# Ensure destination parent folder exists
-		DirAccess.make_dir_recursive_absolute(dest_abs.get_base_dir())
-		
-		# Clean previous frameworks folder if exists to avoid nested copies
-		if DirAccess.dir_exists_absolute(dest_abs):
-			OS.execute("rm", ["-rf", dest_abs])
-
-		var output := []
-		var exit_code := OS.execute("cp", ["-R", src_abs, dest_abs], output, true)
-		if exit_code != 0:
-			push_warning("GodotFirebaseiOS: Failed to copy frameworks directory. Exit code: %d" % exit_code)
-			return
-		else:
-			print("GodotFirebaseiOS: Copied frameworks to: ", dest_abs)
-
-		_modify_pbxproj(_export_path)
-		_export_path = ""
-
-	func _modify_pbxproj(path: String) -> void:
-		var pbxproj_path := path.path_join("project.pbxproj")
-		if not FileAccess.file_exists(pbxproj_path):
-			push_warning("GodotFirebaseiOS: project.pbxproj not found at " + pbxproj_path)
-			return
-		
-		var file := FileAccess.open(pbxproj_path, FileAccess.READ)
-		if not file:
-			push_warning("GodotFirebaseiOS: Failed to open project.pbxproj for reading")
-			return
-		var content := file.get_as_text()
-		file.close()
-
-		var project_name := path.get_file().get_basename()
-		var device_flags := ""
-		var simulator_flags := ""
-
-		for fw in FIREBASE_FRAMEWORKS:
-			var fw_name_no_ext := fw.replace(".xcframework", "")
-			device_flags += " -force_load \\\"$(PROJECT_DIR)/%s/frameworks/%s/ios-arm64/%s.framework/%s\\\"" % [project_name, fw, fw_name_no_ext, fw_name_no_ext]
-			simulator_flags += " -force_load \\\"$(PROJECT_DIR)/%s/frameworks/%s/ios-arm64_x86_64-simulator/%s.framework/%s\\\"" % [project_name, fw, fw_name_no_ext, fw_name_no_ext]
-
-		var regex := RegEx.new()
-		regex.compile("OTHER_LDFLAGS\\s*=\\s*(\\([^\\)]*\\)|\"[^\"]*\")\\s*;")
-		
-		var matches := regex.search_all(content)
-		if matches.is_empty():
-			push_warning("GodotFirebaseiOS: Could not find any OTHER_LDFLAGS pattern in project.pbxproj")
-			return
-
-		# Replace backwards to avoid index shifting
-		matches.reverse()
-		for m in matches:
-			var full_match := m.get_string(0)
-			var raw_flags := m.get_string(1).strip_edges()
-			
-			var original_flags := []
-			if raw_flags.begins_with("("):
-				var lines := raw_flags.substr(1, raw_flags.length() - 2).split("\n")
-				for line in lines:
-					var flag := line.strip_edges().replace("\"", "").replace(",", "")
-					if not flag.is_empty():
-						original_flags.append(flag)
-			else:
-				var clean_str := raw_flags.replace("\"", "")
-				for flag in clean_str.split(" "):
-					var trimmed := flag.strip_edges()
-					if not trimmed.is_empty():
-						original_flags.append(trimmed)
-
-			var original_flags_str := " ".join(original_flags)
-			var replacement_str := "\"OTHER_LDFLAGS[sdk=iphoneos*]\" = \"%s -rdynamic %s\";\n\t\t\t\t\"OTHER_LDFLAGS[sdk=iphonesimulator*]\" = \"%s -rdynamic %s\";" % [original_flags_str, device_flags, original_flags_str, simulator_flags]
-			
-			content = content.replace(full_match, replacement_str)
-
-		var write_file := FileAccess.open(pbxproj_path, FileAccess.WRITE)
-		if write_file:
-			write_file.store_string(content)
-			write_file.close()
-			print("GodotFirebaseiOS: Successfully injected conditional force_load settings in project.pbxproj")
-		else:
-			push_warning("GodotFirebaseiOS: Failed to open project.pbxproj for writing")
