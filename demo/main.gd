@@ -1,30 +1,10 @@
 extends Control
 
-var auth_scene = preload("res://scenes/authentication.tscn")
-var firestore_scene = preload("res://scenes/firestore.tscn")
-var remote_config_scene = preload("res://scenes/remote_config.tscn")
-var analytics_scene = preload("res://scenes/analytics.tscn")
-var messaging_scene = preload("res://scenes/messaging.tscn")
-var rtdb_scene = preload("res://scenes/realtime_db.tscn")
-var rtdb_quick_scene = preload("res://scenes/rtdb_quick_test.tscn")
+var manual_scene := preload("res://scenes/manual_menu.tscn")
+var auto_scene := preload("res://scenes/auto_test.tscn")
 
-func _on_auth_pressed() -> void:
-	get_tree().change_scene_to_packed(auth_scene)
+func _on_manual_pressed() -> void:
+	get_tree().change_scene_to_packed(manual_scene)
 
-func _on_firestore_pressed() -> void:
-	get_tree().change_scene_to_packed(firestore_scene)
-
-func _on_remote_config_pressed() -> void:
-	get_tree().change_scene_to_packed(remote_config_scene)
-
-func _on_analytics_pressed() -> void:
-	get_tree().change_scene_to_packed(analytics_scene)
-
-func _on_messaging_pressed() -> void:
-	get_tree().change_scene_to_packed(messaging_scene)
-
-func _on_rtdb_pressed() -> void:
-	get_tree().change_scene_to_packed(rtdb_scene)
-
-func _on_rtdb_quick_pressed() -> void:
-	get_tree().change_scene_to_packed(rtdb_quick_scene)
+func _on_automatic_pressed() -> void:
+	get_tree().change_scene_to_packed(auto_scene)

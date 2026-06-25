@@ -1,0 +1,172 @@
+[gd_scene load_steps=6 format=3 uid="uid://b8firebasedemo03"]
+
+[ext_resource type="Script" path="res://scenes/auto_test.gd" id="1_auto"]
+[ext_resource type="Script" path="res://scenes/safe_area_container.gd" id="2_safe"]
+[ext_resource type="Theme" uid="uid://b8firebasedemo01" path="res://theme.tres" id="3_theme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_grey"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.86, 0.86, 0.88, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_logpanel"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.1, 0.1, 0.12, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="AutoTest" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_theme")
+script = ExtResource("1_auto")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.94902, 0.94902, 0.968627, 1)
+
+[node name="SafeAreaContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+script = ExtResource("2_safe")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SafeAreaContainer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="SafeAreaContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Automatic Testing"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="SafeAreaContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SafeAreaContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="AuthButton" type="Button" parent="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Authentication"
+
+[node name="FirestoreButton" type="Button" parent="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Cloud Firestore"
+
+[node name="RTDBButton" type="Button" parent="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Realtime Database"
+
+[node name="MessagingButton" type="Button" parent="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Messaging"
+
+[node name="AnalyticsButton" type="Button" parent="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Analytics"
+
+[node name="RemoteConfigButton" type="Button" parent="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Remote Config"
+
+[node name="LogPanel" type="PanelContainer" parent="SafeAreaContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_logpanel")
+
+[node name="Log" type="RichTextLabel" parent="SafeAreaContainer/VBoxContainer/LogPanel"]
+layout_mode = 2
+bbcode_enabled = true
+scroll_following = true
+selection_enabled = true
+theme_override_colors/default_color = Color(0.85, 0.85, 0.88, 1)
+theme_override_font_sizes/normal_font_size = 18
+
+[node name="ButtonRow" type="HBoxContainer" parent="SafeAreaContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ClearButton" type="Button" parent="SafeAreaContainer/VBoxContainer/ButtonRow"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.13, 0.13, 0.15, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_grey")
+theme_override_styles/hover = SubResource("StyleBoxFlat_grey")
+text = "Clear log"
+
+[node name="CopyButton" type="Button" parent="SafeAreaContainer/VBoxContainer/ButtonRow"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.13, 0.13, 0.15, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_grey")
+theme_override_styles/hover = SubResource("StyleBoxFlat_grey")
+text = "Copy"
+
+[node name="BackButton" type="Button" parent="SafeAreaContainer/VBoxContainer/ButtonRow"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.13, 0.13, 0.15, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_grey")
+theme_override_styles/hover = SubResource("StyleBoxFlat_grey")
+text = "Back"
+
+[connection signal="pressed" from="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer/AuthButton" to="." method="_on_auth_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer/FirestoreButton" to="." method="_on_firestore_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer/RTDBButton" to="." method="_on_rtdb_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer/MessagingButton" to="." method="_on_messaging_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer/AnalyticsButton" to="." method="_on_analytics_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/VBoxContainer/ScrollContainer/VBoxContainer/RemoteConfigButton" to="." method="_on_remote_config_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/VBoxContainer/ButtonRow/ClearButton" to="." method="_on_clear_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/VBoxContainer/ButtonRow/CopyButton" to="." method="_on_copy_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/VBoxContainer/ButtonRow/BackButton" to="." method="_on_back_pressed"]

@@ -1,0 +1,109 @@
+[gd_scene load_steps=5 format=3 uid="uid://b8firebasedemo02"]
+
+[ext_resource type="Script" path="res://scenes/manual_menu.gd" id="1_manual"]
+[ext_resource type="Script" path="res://scenes/safe_area_container.gd" id="2_safe"]
+[ext_resource type="Theme" uid="uid://b8firebasedemo01" path="res://theme.tres" id="3_theme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.86, 0.86, 0.88, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="ManualMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_theme")
+script = ExtResource("1_manual")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.94902, 0.94902, 0.968627, 1)
+
+[node name="SafeAreaContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+script = ExtResource("2_safe")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="SafeAreaContainer"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SafeAreaContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="SafeAreaContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "Manual Testing"
+horizontal_alignment = 1
+
+[node name="AuthButton" type="Button" parent="SafeAreaContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+text = "Authentication"
+
+[node name="FirestoreButton" type="Button" parent="SafeAreaContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+text = "Cloud Firestore"
+
+[node name="RTDBButton" type="Button" parent="SafeAreaContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+text = "Realtime Database"
+
+[node name="MessagingButton" type="Button" parent="SafeAreaContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+text = "Messaging"
+
+[node name="AnalyticsButton" type="Button" parent="SafeAreaContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+text = "Analytics"
+
+[node name="RemoteConfigButton" type="Button" parent="SafeAreaContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+text = "Remote Config"
+
+[node name="BackButton" type="Button" parent="SafeAreaContainer/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.13, 0.13, 0.15, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_back")
+theme_override_styles/hover = SubResource("StyleBoxFlat_back")
+text = "Back"
+
+[connection signal="pressed" from="SafeAreaContainer/ScrollContainer/VBoxContainer/AuthButton" to="." method="_on_auth_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/ScrollContainer/VBoxContainer/FirestoreButton" to="." method="_on_firestore_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/ScrollContainer/VBoxContainer/RTDBButton" to="." method="_on_rtdb_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/ScrollContainer/VBoxContainer/MessagingButton" to="." method="_on_messaging_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/ScrollContainer/VBoxContainer/AnalyticsButton" to="." method="_on_analytics_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/ScrollContainer/VBoxContainer/RemoteConfigButton" to="." method="_on_remote_config_pressed"]
+[connection signal="pressed" from="SafeAreaContainer/ScrollContainer/VBoxContainer/BackButton" to="." method="_on_back_pressed"]
