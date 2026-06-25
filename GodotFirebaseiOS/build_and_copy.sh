@@ -33,6 +33,18 @@ fi
 echo "🔨 Building GodotFirebaseiOS ($CONFIGURATION) for iOS..."
 cd "$SCRIPT_DIR"
 
+FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
+XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
+
+# Clean the prior device-framework output so the existence check below proves THIS
+# build produced it — otherwise a failed rebuild could ship a stale artifact.
+rm -rf "$FRAMEWORK_SOURCE"
+
+# The SwiftGodot 'Generator' host-tool target fails to link (a macOS object pulled into
+# an iOS build) and makes xcodebuild exit non-zero even when our framework target
+# succeeds. Capture the status instead of blanket-ignoring it, then require the framework
+# to actually exist below — so a real framework-target failure is NOT masked.
+set +e
 xcodebuild \
   -scheme GodotFirebaseiOS \
   -sdk iphoneos \
@@ -43,15 +55,17 @@ xcodebuild \
   -skipMacroValidation \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
-  DEBUG_INFORMATION_FORMAT="dwarf" || true
+  DEBUG_INFORMATION_FORMAT="dwarf"
+BUILD_STATUS=$?
+set -e
 
 echo "📋 Locating built frameworks..."
-FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
-XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
-
 if [ ! -d "$FRAMEWORK_SOURCE" ]; then
-  echo "❌ Error: Framework not found at $FRAMEWORK_SOURCE"
+  echo "❌ Error: Framework not found at $FRAMEWORK_SOURCE (xcodebuild exited $BUILD_STATUS)"
   exit 1
+fi
+if [ "$BUILD_STATUS" -ne 0 ]; then
+  echo "⚠️  xcodebuild exited $BUILD_STATUS but the framework was produced (known-benign SwiftGodot 'Generator' host-tool link failure). Continuing."
 fi
 
 # NOTE: No PrivacyInfo.xcprivacy is embedded here. Privacy declaration is the

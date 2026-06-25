@@ -18,7 +18,7 @@ and exposes Firebase Authentication as `@Callable` functions and `@Signal` prope
 
 | Package | Requirement | Resolved |
 |---------|-------------|---------|
-| [SwiftGodot](https://github.com/migueldeicaza/SwiftGodot) | pinned revision `61f258c` | — |
+| [SwiftGodot](https://github.com/migueldeicaza/SwiftGodot) | pinned revision `ead7bffc` | see [`Package.resolved`](Package.resolved) |
 | [firebase-ios-sdk](https://github.com/firebase/firebase-ios-sdk) | >= 11.0.0 | 11.15.0 |
 | [GoogleSignIn-iOS](https://github.com/google/GoogleSignIn-iOS) | >= 9.1.0 | 9.1.0 |
 
@@ -26,12 +26,15 @@ and exposes Firebase Authentication as `@Callable` functions and `@Signal` prope
 
 ## Building the Framework
 
-1. Open `Package.swift` in Xcode.
-2. Select the `GodotFirebaseiOS` scheme, set destination to **Any iOS Device (arm64)**.
-3. Build with **Product → Build** (Release configuration).
-4. Open **Product → Show Build Folder in Finder**.
-5. Navigate to `Release-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework`.
-6. Copy it into `demo/addons/GodotFirebaseiOS/GodotFirebaseiOS.framework`, replacing the existing one.
+Run the build script from the repo root — it compiles via SwiftPM with Firebase
+statically linked, produces the merged `GodotFirebaseiOS.xcframework`, and copies it
+into `demo/addons/GodotFirebaseiOS/`:
+
+```bash
+./GodotFirebaseiOS/build_and_copy.sh release
+```
+
+See the [main README](../README.md#development--building) for details.
 
 ---
 

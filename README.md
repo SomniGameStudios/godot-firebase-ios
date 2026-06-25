@@ -72,6 +72,31 @@ revision in [`GodotFirebaseiOS/Package.swift`](GodotFirebaseiOS/Package.swift)
 
 ---
 
+## Using the plugin in your app
+
+Two iOS App Store requirements are **the consuming app's responsibility** — the plugin handles neither:
+
+**1. Sign the framework before archiving.** `GodotFirebaseiOS.xcframework` ships **unsigned** with Firebase statically linked (~27 MB). Because it redistributes a third-party listed SDK, Apple requires *you* to sign it with your own distribution certificate **before the Xcode archive** — app-level "Code Sign On Copy" is not sufficient, or the App Store rejects the upload with **ITMS-91065**. Re-sign it in your build/CI, signing each slice then the bundle:
+
+```bash
+for slice in GodotFirebaseiOS.xcframework/*/GodotFirebaseiOS.framework; do
+  codesign --force --timestamp --sign "$YOUR_DISTRIBUTION_IDENTITY" "$slice"
+done
+codesign --force --timestamp --sign "$YOUR_DISTRIBUTION_IDENTITY" GodotFirebaseiOS.xcframework
+```
+
+**2. Declare Firebase's privacy reasons.** The plugin bundles **no privacy manifest**. Declare the required-reason APIs in your Godot **iOS export preset** (Project → Export → iOS → Privacy):
+
+| Export preset field | Reason codes |
+|---|---|
+| User Defaults Access Reasons | `CA92.1`, `1C8F.1` |
+| File Timestamp Access Reasons | `C617.1` |
+| System Boot Time Access Reasons | `35F9.1` |
+
+Full guidance, including the App Store data-collection labels, is in **[docs/PRIVACY.md](docs/PRIVACY.md)**.
+
+---
+
 ## Requirements
 
 | Tool | Minimum |
