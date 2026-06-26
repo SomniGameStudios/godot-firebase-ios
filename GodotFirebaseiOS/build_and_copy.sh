@@ -33,7 +33,7 @@ fi
 echo "🔨 Building GodotFirebaseiOS ($CONFIGURATION) for iOS..."
 cd "$SCRIPT_DIR"
 
-FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/PackageFrameworks/GodotFirebaseiOS.framework"
+FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/GodotFirebaseiOS.framework"
 FRAMEWORK_BINARY="$FRAMEWORK_SOURCE/GodotFirebaseiOS"
 XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
 
