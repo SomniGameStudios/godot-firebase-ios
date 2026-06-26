@@ -33,9 +33,17 @@ fi
 echo "🔨 Building GodotFirebaseiOS ($CONFIGURATION) for iOS..."
 cd "$SCRIPT_DIR"
 
-FRAMEWORK_SOURCE="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos/GodotFirebaseiOS.framework"
-FRAMEWORK_BINARY="$FRAMEWORK_SOURCE/GodotFirebaseiOS"
+PRODUCTS_DIR="$BUILD_PATH/Build/Products/$CONFIGURATION-iphoneos"
 XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
+
+locate_framework() {
+  local fw
+  for dir in "$PRODUCTS_DIR" "$PRODUCTS_DIR/PackageFrameworks"; do
+    fw="$dir/GodotFirebaseiOS.framework"
+    [ -f "$fw/GodotFirebaseiOS" ] && echo "$fw" && return 0
+  done
+  return 1
+}
 
 # SwiftGodot's 'Generator' host-tool target intermittently fails to resolve its SwiftSyntax
 # dependency when the scheme is built for an iOS destination (an explicit-module race on the
@@ -45,6 +53,7 @@ XCFRAMEWORK_OUT="$BUILD_PATH/GodotFirebaseiOS.xcframework"
 # only when the binary was actually produced (the Generator failure is benign in that case).
 MAX_ATTEMPTS=3
 BUILD_STATUS=0
+FRAMEWORK_SOURCE=""
 for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
   echo "🔁 xcodebuild attempt $attempt/$MAX_ATTEMPTS..."
   set +e
@@ -61,18 +70,24 @@ for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
     DEBUG_INFORMATION_FORMAT="dwarf"
   BUILD_STATUS=$?
   set -e
-  [ -f "$FRAMEWORK_BINARY" ] && break
+  FRAMEWORK_SOURCE="$(locate_framework)" && break
   echo "⚠️  Framework binary missing after attempt $attempt (xcodebuild exited $BUILD_STATUS)."
 done
 
+FRAMEWORK_BINARY="$FRAMEWORK_SOURCE/GodotFirebaseiOS"
+
 echo "📋 Locating built frameworks..."
 if [ ! -f "$FRAMEWORK_BINARY" ]; then
-  echo "❌ Error: framework binary not found at $FRAMEWORK_BINARY after $MAX_ATTEMPTS attempts (last xcodebuild exit $BUILD_STATUS)"
+  echo "❌ Error: framework binary not found after $MAX_ATTEMPTS attempts (last xcodebuild exit $BUILD_STATUS)"
+  echo "   Searched:"
+  echo "     $PRODUCTS_DIR/GodotFirebaseiOS.framework/GodotFirebaseiOS"
+  echo "     $PRODUCTS_DIR/PackageFrameworks/GodotFirebaseiOS.framework/GodotFirebaseiOS"
   exit 1
 fi
 if [ "$BUILD_STATUS" -ne 0 ]; then
   echo "⚠️  xcodebuild exited $BUILD_STATUS; the framework binary was produced (benign SwiftGodot 'Generator' host-tool failure). Continuing."
 fi
+echo "   Found: $FRAMEWORK_SOURCE"
 
 # NOTE: No PrivacyInfo.xcprivacy is embedded here. Privacy declaration is the
 # consuming app's responsibility — the app's own privacy manifest must declare the
