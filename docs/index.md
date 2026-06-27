@@ -25,7 +25,7 @@ Designed to work alongside [GodotFirebaseAndroid](https://github.com/syntaxerror
 4. Enable the plugin in **Project → Project Settings → Plugins**. The `FirebaseIOS` autoload is registered automatically.
 5. Place your `GoogleService-Info.plist` in `addons/GodotFirebaseiOS/`.
 6. **Before submitting to the App Store**, handle two consumer responsibilities:
-   - **Sign** `GodotFirebaseiOS.xcframework` with your own distribution certificate in your build/CI *before archiving* — it redistributes a statically-linked third-party SDK, so app-level Code-Sign-On-Copy is not enough (ITMS-91065).
+   - **Codesign** is handled automatically: Godot's export plugin automatically patches your Xcode project to inject a codesigning phase that signs the framework during compile time, resolving ITMS-91065.
    - **Declare** Firebase's required-reason API usage in your iOS export preset. See the [README](https://github.com/SomniGameStudios/godot-firebase-ios#using-the-plugin-in-your-app) and `docs/PRIVACY.md`.
 
 > **Version match:** this plugin and `GodotApplePluginsRuntime` must be built against the same SwiftGodot revision, or the iOS app will crash at launch with Swift symbol errors. See the [README](https://github.com/SomniGameStudios/godot-firebase-ios#dependencies) for the pinned revision.

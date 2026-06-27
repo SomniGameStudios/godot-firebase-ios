@@ -76,14 +76,7 @@ revision in [`GodotFirebaseiOS/Package.swift`](GodotFirebaseiOS/Package.swift)
 
 Two iOS App Store requirements are **the consuming app's responsibility** — the plugin handles neither:
 
-**1. Sign the framework before archiving.** `GodotFirebaseiOS.xcframework` ships **unsigned** with Firebase statically linked (~27 MB). Because it redistributes a third-party listed SDK, Apple requires *you* to sign it with your own distribution certificate **before the Xcode archive** — app-level "Code Sign On Copy" is not sufficient, or the App Store rejects the upload with **ITMS-91065**. Re-sign it in your build/CI, signing each slice then the bundle:
-
-```bash
-for slice in GodotFirebaseiOS.xcframework/*/GodotFirebaseiOS.framework; do
-  codesign --force --timestamp --sign "$YOUR_DISTRIBUTION_IDENTITY" "$slice"
-done
-codesign --force --timestamp --sign "$YOUR_DISTRIBUTION_IDENTITY" GodotFirebaseiOS.xcframework
-```
+**1. Codesign is handled automatically.** The plugin automatically patches your exported Xcode project to add a custom post-build codesigning script. When you compile or archive your app, Xcode automatically signs `GodotFirebaseiOS.framework` using your active codesigning identity, resolving **ITMS-91065** automatically. No manual signing steps are required.
 
 **2. Declare Firebase's privacy reasons.** The plugin bundles **no privacy manifest**. Declare the required-reason APIs in your Godot **iOS export preset** (Project → Export → iOS → Privacy):
 
@@ -121,13 +114,7 @@ via Swift Package Manager — there is no separate SDK download or XcodeGen step
 
    No privacy manifest is bundled — the consuming app declares privacy (see [docs/PRIVACY.md](docs/PRIVACY.md)).
 
-   The framework is **unsigned** by default. The App Store requires the redistributor's
-   signature on the statically-linked Firebase SDK (ITMS-91065) — this is applied by the
-   **consuming app** with its own distribution identity before archiving. To sign locally
-   for testing, pass an identity:
-   ```bash
-   SIGN_IDENTITY="Apple Development: you@example.com (TEAMID)" ./GodotFirebaseiOS/build_and_copy.sh release
-   ```
+   The framework is unsigned by default. The exporter plugin automatically handles codesigning during the Xcode build/compile phase, so there is no need to manually sign the framework.
 
 2. **Vendor output into the main app project**:
    Copy the compiled addon folder `demo/addons/GodotFirebaseiOS/` into your main Godot project's `addons/` directory:

@@ -13,8 +13,7 @@ single `GodotFirebaseiOS.xcframework` with Firebase statically linked and copies
 `demo/addons/GodotFirebaseiOS/`. Requires macOS with Xcode 15+. No privacy manifest is
 bundled — privacy declaration is the consuming app's responsibility (see `docs/PRIVACY.md`).
 
-The framework ships **unsigned** — the consuming app re-signs the statically-linked Firebase SDK
-with its own distribution identity before archive (ITMS-91065). Pass `SIGN_IDENTITY="…"` to sign locally.
+The framework is unsigned by default — the Godot editor exporter automatically patches the project to run a post-build codesigning script that signs it with the active developer/distribution certificate in Xcode, resolving ITMS-91065.
 
 ## Run the Demo
 
