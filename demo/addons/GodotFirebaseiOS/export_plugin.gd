@@ -62,9 +62,6 @@ class IOSExportPlugin extends EditorExportPlugin:
 			return
 
 		var export_dir := _export_path.get_base_dir()
-		_defer_pbxproj_patch.call_deferred(export_dir)
-
-	func _defer_pbxproj_patch(export_dir: String) -> void:
 		_patch_xcodeproj(export_dir)
 
 	func _patch_xcodeproj(export_dir: String) -> void:
