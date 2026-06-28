@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=3 format=3 uid="uid://b8firebasedemo01"]
+[gd_resource type="Theme" format=3 uid="uid://dgph72rtx6pvw"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
 content_margin_left = 14.0
@@ -24,10 +24,10 @@ corner_radius_bottom_left = 14
 
 [resource]
 Button/colors/font_color = Color(1, 1, 1, 1)
-Button/colors/font_pressed_color = Color(1, 1, 1, 1)
 Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/colors/font_pressed_color = Color(1, 1, 1, 1)
 Button/font_sizes/font_size = 30
-Button/styles/normal = SubResource("StyleBoxFlat_button")
 Button/styles/hover = SubResource("StyleBoxFlat_button")
+Button/styles/normal = SubResource("StyleBoxFlat_button")
 Button/styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 Label/colors/font_color = Color(0.13, 0.13, 0.15, 1)
