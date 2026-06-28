@@ -12,12 +12,14 @@ PROJECT_ROOT="$SCRIPT_DIR/.."
 ADDON_PATH="$PROJECT_ROOT/demo/addons/GodotFirebaseiOS"
 BUILD_PATH="$SCRIPT_DIR/.build/xcodebuild"
 
-# Code-signing identity for the xcframework. Apple requires the *distributor* of a
-# repackaged third-party SDK to sign it (ITMS-91065), because we statically link
-# Firebase (compiled from source) into this framework. App-level CodeSignOnCopy at
-# the host app's archive step is NOT sufficient. Pass any valid Apple-issued signing
-# identity (Apple Development is fine — the host app re-signs the binary for
-# distribution). Left empty here on purpose so no production identity is committed:
+# OPTIONAL code-signing identity for the xcframework. By default the framework ships
+# UNSIGNED: the Godot iOS export plugin injects a codesign build phase into the exported
+# Xcode project, so the consuming app signs the framework with its own active identity at
+# build/archive time — resolving ITMS-91065 automatically, with no manual step required.
+#
+# Set SIGN_IDENTITY only to PRE-sign the binary here instead — e.g. for a headless/CI
+# export pipeline that does not run the editor export plugin. The host app re-signs the
+# binary for distribution either way. Left empty so no identity is committed:
 #   SIGN_IDENTITY="Apple Development: you@example.com (TEAMID)" ./build_and_copy.sh release
 SIGN_IDENTITY="${SIGN_IDENTITY:-}"
 
@@ -177,12 +179,14 @@ xcodebuild -create-xcframework \
   -framework "$SIM_FRAMEWORK_DIR" \
   -output "$XCFRAMEWORK_OUT"
 
-# --- Code Signing ---
-# Sign each framework slice (seals the binary + Info.plist + PrivacyInfo.xcprivacy),
-# then sign the xcframework bundle so its origin can be verified. Required to satisfy
-# App Store ITMS-91065 for the statically-linked Firebase SDK.
+# --- Code Signing (optional) ---
+# By default the framework ships UNSIGNED and is signed by the consuming app's Xcode
+# build: the Godot iOS export plugin injects a "Codesign GodotFirebaseiOS" build phase
+# that signs it with the app's active identity at build/archive time (resolves ITMS-91065).
+# Set SIGN_IDENTITY to PRE-sign the binary here instead (e.g. a headless/CI export that
+# bypasses the editor plugin). Signing each slice then the bundle seals their origin.
 if [ -n "$SIGN_IDENTITY" ]; then
-  echo "🔏 Signing xcframework with identity: $SIGN_IDENTITY"
+  echo "🔏 Pre-signing xcframework with identity: $SIGN_IDENTITY"
   for SLICE_FW in "$XCFRAMEWORK_OUT"/*/GodotFirebaseiOS.framework; do
     echo "  • Signing $SLICE_FW"
     codesign --force --timestamp --sign "$SIGN_IDENTITY" "$SLICE_FW"
@@ -194,9 +198,9 @@ if [ -n "$SIGN_IDENTITY" ]; then
   codesign --verify --strict --verbose=2 "$XCFRAMEWORK_OUT/ios-arm64/GodotFirebaseiOS.framework"
   codesign -dvv "$XCFRAMEWORK_OUT/ios-arm64/GodotFirebaseiOS.framework" 2>&1 | grep -E "Authority|TeamIdentifier|Identifier" || true
 else
-  echo "⚠️  SIGN_IDENTITY not set — xcframework is UNSIGNED."
-  echo "    The App Store will reject this build with ITMS-91065 (Missing signature)."
-  echo "    Re-run with a signing identity, e.g.:"
+  echo "ℹ️  xcframework is UNSIGNED (by design)."
+  echo "    The Godot iOS export plugin signs it automatically during the Xcode build/archive"
+  echo "    (resolves ITMS-91065). To pre-sign here instead — e.g. for headless/CI export — run:"
   echo "      SIGN_IDENTITY=\"Apple Development: you@example.com (TEAMID)\" $0 $*"
 fi
 
