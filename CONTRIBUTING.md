@@ -22,8 +22,13 @@ The compiled framework is copied automatically to `demo/addons/GodotFirebaseiOS/
 ## Run the Demo
 
 1. Place your `GoogleService-Info.plist` in `demo/addons/GodotFirebaseiOS/`.
-2. Open `demo/` in Godot 4.4+.
-3. Export to a physical iOS device (required for Google Sign-In).
+2. Create the export preset Godot loads (gitignored, so your signing values stay out of git):
+   ```bash
+   cd demo
+   cp export_presets.cfg.example export_presets.cfg
+   ```
+3. Open `demo/` in Godot 4.4+.
+4. Export to a physical iOS device (required for Google Sign-In).
 
 ## Pull Requests
 
