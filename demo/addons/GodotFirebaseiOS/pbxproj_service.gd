@@ -39,11 +39,22 @@ static func patch(path: String) -> void:
 			+ "/* End PBXShellScriptBuildPhase section */"
 		)
 
+	# No section to host the phase: bail rather than reference an undefined phase
+	# (a dangling buildPhases ref makes Xcode refuse to open the project).
+	if not content.contains("/* End PBXShellScriptBuildPhase section */"):
+		push_error(
+			"GodotFirebaseiOS: PBXShellScriptBuildPhase section not found and could not "
+			+ "be created in " + path + " — unexpected pbxproj layout; codesign phase NOT "
+			+ "injected. Framework will ship unsigned (ITMS-91065)."
+		)
+		return
+
 	# Inject our shell script build phase definition
 	var shell_script := (
 		"if [ -d \\\"$BUILT_PRODUCTS_DIR/"
 		+ "$FRAMEWORKS_FOLDER_PATH/GodotFirebaseiOS.framework\\\" ]; then\\n"
-		+ "  if [ -n \\\"${EXPANDED_CODE_SIGN_IDENTITY}\\\" ]; then\\n"
+		+ "  if [ -n \\\"${EXPANDED_CODE_SIGN_IDENTITY}\\\" ] "
+		+ "&& [ \\\"${EXPANDED_CODE_SIGN_IDENTITY}\\\" != \\\"-\\\" ]; then\\n"
 		+ "    codesign --force --timestamp --sign \\\"${EXPANDED_CODE_SIGN_IDENTITY}\\\" "
 		+ "\\\"$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH/GodotFirebaseiOS.framework\\\"\\n"
 		+ "  else\\n"
@@ -77,6 +88,7 @@ static func patch(path: String) -> void:
 	)
 
 	# Inject into the native target's buildPhases array
+	var injected := 0
 	var target_index := content.find("isa = PBXNativeTarget;")
 	while target_index != -1:
 		var build_phases_start := content.find("buildPhases = (", target_index)
@@ -87,10 +99,26 @@ static func patch(path: String) -> void:
 					build_phases_end,
 					"				" + phase_id + " /* Codesign GodotFirebaseiOS */,\n"
 				)
-		target_index = content.find("isa = PBXNativeTarget;", build_phases_start + 1)
+				injected += 1
+		target_index = content.find("isa = PBXNativeTarget;", target_index + 1)
+
+	# No target wired up: don't save an orphan phase that never runs; report instead.
+	if injected == 0:
+		push_error(
+			"GodotFirebaseiOS: no PBXNativeTarget buildPhases array found in " + path
+			+ " — codesign phase not wired to any target. Framework will ship unsigned "
+			+ "(ITMS-91065)."
+		)
+		return
 
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file:
 		file.store_string(content)
 		file.close()
 		print("GodotFirebaseiOS: Patched project.pbxproj with Codesign Run Script phase")
+	else:
+		push_error(
+			"GodotFirebaseiOS: failed to open " + path + " for writing (error "
+			+ str(FileAccess.get_open_error()) + ") — codesign phase NOT saved; "
+			+ "framework will ship unsigned (ITMS-91065)."
+		)
