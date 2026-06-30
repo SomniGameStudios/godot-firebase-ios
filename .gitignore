@@ -14,6 +14,9 @@ xcuserdata/
 demo/ios/build/
 demo/android/
 
+# Local export config (copy from export_presets.cfg.example)
+demo/export_presets.cfg
+
 # Firebase credentials (download from Firebase Console, never commit)
 GoogleService-Info.plist
 
