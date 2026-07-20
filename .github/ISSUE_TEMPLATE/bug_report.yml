@@ -3,69 +3,26 @@ description: Something is broken or behaves unexpectedly
 labels: [bug]
 body:
   - type: textarea
-    id: description
+    id: what-happened
     attributes:
-      label: Describe the bug
-      description: A clear description of what the bug is.
-    validations:
-      required: true
-
-  - type: textarea
-    id: reproduce
-    attributes:
-      label: To reproduce
-      description: Minimal steps to reproduce, ideally against the demo project.
-      placeholder: |
-        1. Open the demo project
-        2. Call ...
-        3. Observe ...
-    validations:
-      required: true
-
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected behavior
+      label: What happened?
+      description: What went wrong, and what did you expect instead? Steps to reproduce help a lot.
     validations:
       required: true
 
   - type: input
-    id: plugin-version
+    id: versions
     attributes:
-      label: Plugin version
-      placeholder: e.g. 1.0.1
+      label: Versions
+      placeholder: "plugin 1.0.1, Godot 4.4.1, iOS 18.5"
     validations:
       required: true
-
-  - type: input
-    id: godot-version
-    attributes:
-      label: Godot version
-      placeholder: e.g. 4.4.1
-    validations:
-      required: true
-
-  - type: input
-    id: xcode-version
-    attributes:
-      label: Xcode version
-      placeholder: e.g. 16.3
-    validations:
-      required: false
-
-  - type: input
-    id: ios-version
-    attributes:
-      label: iOS version / device
-      placeholder: e.g. iOS 18.5, iPhone 15
-    validations:
-      required: false
 
   - type: textarea
     id: logs
     attributes:
-      label: Logs
-      description: Relevant Xcode console output, stack traces, or Godot logs. Automatically formatted as code.
+      label: Logs (optional)
+      description: Xcode console output, stack traces, or Godot logs.
       render: shell
     validations:
       required: false

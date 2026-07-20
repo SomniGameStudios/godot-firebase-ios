@@ -13,13 +13,6 @@ body:
   - type: textarea
     id: solution
     attributes:
-      label: Proposed solution
-    validations:
-      required: false
-
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives considered
+      label: Proposed solution (optional)
     validations:
       required: false
