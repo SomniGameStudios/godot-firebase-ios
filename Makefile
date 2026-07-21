@@ -1,3 +1,9 @@
+# Recipes pipe xcodebuild through tail, and make only sees the last command's
+# exit status. pipefail makes a failed xcodebuild fail the recipe instead of
+# silently packaging the previous build's products. It is set per line below
+# because the make that ships with macOS (3.81) silently ignores .SHELLFLAGS.
+SHELL := /bin/bash
+
 FIREBASE_VERSION = 11.15.0
 FIREBASE_ZIP_URL = https://github.com/firebase/firebase-ios-sdk/releases/download/$(FIREBASE_VERSION)/Firebase.zip
 
@@ -84,7 +90,7 @@ setup-project:
 
 build: setup-project
 	@echo "→ Building GodotFirebaseiOS for iOS Device..."
-	@xcodebuild -project $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj \
+	@set -o pipefail; xcodebuild -project $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj \
 		-scheme GodotFirebaseiOS \
 		-destination "generic/platform=iOS" \
 		-configuration Release \
@@ -95,7 +101,7 @@ build: setup-project
 		CODE_SIGNING_REQUIRED=NO \
 		| tail -20
 	@echo "→ Building GodotFirebaseiOS for iOS Simulator..."
-	@xcodebuild -project $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj \
+	@set -o pipefail; xcodebuild -project $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj \
 		-scheme GodotFirebaseiOS \
 		-destination "generic/platform=iOS Simulator" \
 		-configuration Release \
