@@ -623,16 +623,19 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
 
     private func toJsonSafe(_ value: Any) -> Any {
         switch value {
-        case let b as Bool:
-            return b
-        case let i as Int:
-            return i
-        case let i as Int64:
-            return Int(i)
-        case let d as Double:
-            return d
-        case let f as Float:
-            return Double(f)
+        case let n as NSNumber:
+            // Firestore numbers arrive as NSNumber, and 0 and 1 pass an `as Bool`
+            // cast through bridging. Only a genuine CFBoolean is a bool; any other
+            // NSNumber is numeric, keyed off its objCType.
+            if CFGetTypeID(n as CFTypeRef) == CFBooleanGetTypeID() {
+                return n.boolValue
+            }
+            switch String(cString: n.objCType) {
+            case "f", "d":
+                return n.doubleValue
+            default:
+                return Int(truncating: n)
+            }
         case let s as String:
             return s
         case let ts as Timestamp:
@@ -648,14 +651,18 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
 
     private func swiftToVariant(_ value: Any) -> Variant {
         switch value {
-        case let b as Bool:
-            return Variant(b)
-        case let i as Int:
-            return Variant(i)
-        case let i as Int64:
-            return Variant(Int(i))
-        case let d as Double:
-            return Variant(d)
+        case let n as NSNumber:
+            // Same CFBoolean disambiguation as toJsonSafe: NSNumber 0 and 1
+            // otherwise match `as Bool` and corrupt integer fields on read.
+            if CFGetTypeID(n as CFTypeRef) == CFBooleanGetTypeID() {
+                return Variant(n.boolValue)
+            }
+            switch String(cString: n.objCType) {
+            case "f", "d":
+                return Variant(n.doubleValue)
+            default:
+                return Variant(Int(truncating: n))
+            }
         case let s as String:
             return Variant(s)
         case let ts as Timestamp:
