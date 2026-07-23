@@ -8,7 +8,7 @@ let package = Package(
         .library(name: "GodotFirebaseiOS", type: .dynamic, targets: ["GodotFirebaseiOS"])
     ],
     dependencies: [
-        .package(url: "https://github.com/migueldeicaza/SwiftGodot", revision: "ead7bffc9546c1740678a36096282e1a811b7da6"),
+        .package(url: "https://github.com/migueldeicaza/SwiftGodot", revision: "8122086c57b803c11ec5d01faf1f2449583cd374"),
         .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "11.0.0"),
         .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "9.1.0")
     ],
