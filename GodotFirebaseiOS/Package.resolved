@@ -1,5 +1,5 @@
 {
-  "originHash" : "0cb65931becd4cdeb1e265ba9bb8274d53d9ab377c2db6392c07240ce41ef80c",
+  "originHash" : "a2235dae28a2a591e33c4d63637b6722ae48f978453952a74a532a694ad9aefa",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -177,7 +177,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/migueldeicaza/SwiftGodot",
       "state" : {
-        "revision" : "ead7bffc9546c1740678a36096282e1a811b7da6"
+        "revision" : "8122086c57b803c11ec5d01faf1f2449583cd374"
       }
     }
   ],

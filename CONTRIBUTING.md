@@ -4,9 +4,9 @@
 
 | Tool | Version |
 |------|---------|
-| Xcode | 15+ |
-| Swift | 5.9+ |
-| macOS | 14+ |
+| Xcode | 26.4.1+ |
+| Swift | 6.3+ |
+| macOS | 26.2+ |
 | Godot | 4.4+ |
 
 ## Build
