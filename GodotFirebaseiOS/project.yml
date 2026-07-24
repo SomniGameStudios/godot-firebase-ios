@@ -5,7 +5,7 @@ options:
 packages:
   SwiftGodot:
     url: https://github.com/migueldeicaza/SwiftGodot.git
-    revision: ead7bffc9546c1740678a36096282e1a811b7da6
+    revision: 8122086c57b803c11ec5d01faf1f2449583cd374
 
 targets:
   GodotFirebaseiOS:
