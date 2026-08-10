@@ -623,16 +623,8 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
 
     private func toJsonSafe(_ value: Any) -> Any {
         switch value {
-        case let b as Bool:
-            return b
-        case let i as Int:
-            return i
-        case let i as Int64:
-            return Int(i)
-        case let d as Double:
-            return d
-        case let f as Float:
-            return Double(f)
+        case let n as NSNumber:
+            return NSNumberBridging.toAny(n)
         case let s as String:
             return s
         case let ts as Timestamp:
@@ -648,14 +640,8 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
 
     private func swiftToVariant(_ value: Any) -> Variant {
         switch value {
-        case let b as Bool:
-            return Variant(b)
-        case let i as Int:
-            return Variant(i)
-        case let i as Int64:
-            return Variant(Int(i))
-        case let d as Double:
-            return Variant(d)
+        case let n as NSNumber:
+            return NSNumberBridging.toVariant(n)
         case let s as String:
             return Variant(s)
         case let ts as Timestamp:
