@@ -221,16 +221,8 @@ class FirebaseDatabasePlugin: RefCounted, @unchecked Sendable {
     private func swiftToVariant(_ value: Any?) -> Variant {
         guard let value = value, !(value is NSNull) else { return Variant(GDictionary()) }
 
-        if let b = value as? Bool {
-            return Variant(b)
-        } else if let i = value as? Int {
-            return Variant(i)
-        } else if let i64 = value as? Int64 {
-            return Variant(Int(i64))
-        } else if let d = value as? Double {
-            return Variant(d)
-        } else if let f = value as? Float {
-            return Variant(Double(f))
+        if let n = value as? NSNumber {
+            return NSNumberBridging.toVariant(n)
         } else if let s = value as? String {
             return Variant(s)
         } else if let dict = value as? [String: Any] {
