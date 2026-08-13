@@ -131,6 +131,19 @@ FirebaseIOS.auth.link_with_apple()
 ---
 
 {: .text-green-100 }
+### get_last_apple_authorization_code() -> String
+
+Returns the Apple `authorizationCode` captured during the most recent `sign_in_with_apple()` or `link_with_apple()` attempt, or `""` when none was obtained. The code is single use and expires roughly 5 minutes after issuance. Apple's token revocation endpoint consumes it, which App Store Review Guideline 5.1.1(v) requires before account deletion, so read it right after the corresponding success signal and exchange it server side promptly.
+
+```gdscript
+FirebaseIOS.auth.sign_in_with_apple()
+# ... after auth_success fires:
+var code = FirebaseIOS.auth.get_last_apple_authorization_code()
+```
+
+---
+
+{: .text-green-100 }
 ### sign_out()
 
 Signs out from Firebase and Google.

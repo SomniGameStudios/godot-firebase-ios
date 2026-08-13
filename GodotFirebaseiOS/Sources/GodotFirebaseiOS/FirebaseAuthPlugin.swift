@@ -38,6 +38,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
     @Signal("error_message") var profile_update_failure: SignalWithArguments<String>
 
     private var appleSignInHelper: AppleSignInHelper?
+    private var lastAppleAuthorizationCode: String = ""
     private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     // MARK: - Emulator
@@ -211,9 +212,10 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             auth_failure.emit("Firebase not initialized")
             return
         }
-        performAppleSignIn { [weak self] credential, error in
+        performAppleSignIn { [weak self] credential, authorizationCode, error in
             guard let self else { return }
             self.appleSignInHelper = nil
+            self.lastAppleAuthorizationCode = authorizationCode ?? ""
             if let error {
                 Task { @MainActor in self.auth_failure.emit(error) }
                 return
@@ -244,9 +246,10 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             link_with_apple_failure.emit("No user signed in")
             return
         }
-        performAppleSignIn { [weak self] credential, error in
+        performAppleSignIn { [weak self] credential, authorizationCode, error in
             guard let self else { return }
             self.appleSignInHelper = nil
+            self.lastAppleAuthorizationCode = authorizationCode ?? ""
             if let error {
                 Task { @MainActor in self.link_with_apple_failure.emit(error) }
                 return
@@ -265,6 +268,15 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
                 }
             }
         }
+    }
+
+    /// Returns the Apple `authorizationCode` captured by the most recent
+    /// sign_in_with_apple() or link_with_apple() attempt, or "" when none was
+    /// obtained. Single use, expires roughly 5 minutes after issuance; read it
+    /// right after the corresponding success signal and exchange it promptly.
+    @Callable
+    func get_last_apple_authorization_code() -> String {
+        return lastAppleAuthorizationCode
     }
 
     // MARK: - Sign Out
@@ -566,7 +578,8 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
         #endif
     }
 
-    private func performAppleSignIn(completion: @escaping (AuthCredential?, String?) -> Void) {
+    // Completion arguments: (credential, authorizationCode, errorMessage).
+    private func performAppleSignIn(completion: @escaping (AuthCredential?, String?, String?) -> Void) {
         #if os(iOS)
         let nonce = randomNonceString()
         let hashedNonce = sha256(nonce)
@@ -578,7 +591,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 
         DispatchQueue.main.async {
             guard let window = self.topMostViewController()?.view.window else {
-                completion(nil, "Could not find presenting window for Apple Sign-In")
+                completion(nil, nil, "Could not find presenting window for Apple Sign-In")
                 return
             }
             let helper = AppleSignInHelper(window: window, rawNonce: nonce, completion: completion)
@@ -590,7 +603,7 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
             controller.performRequests()
         }
         #else
-        completion(nil, "Apple Sign-In is only available on iOS")
+        completion(nil, nil, "Apple Sign-In is only available on iOS")
         #endif
     }
 
@@ -686,9 +699,9 @@ class FirebaseAuthPlugin: RefCounted, @unchecked Sendable {
 class AppleSignInHelper: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
     private let window: UIWindow
     private let rawNonce: String
-    private let completion: (AuthCredential?, String?) -> Void
+    private let completion: (AuthCredential?, String?, String?) -> Void
 
-    init(window: UIWindow, rawNonce: String, completion: @escaping (AuthCredential?, String?) -> Void) {
+    init(window: UIWindow, rawNonce: String, completion: @escaping (AuthCredential?, String?, String?) -> Void) {
         self.window = window
         self.rawNonce = rawNonce
         self.completion = completion
@@ -702,20 +715,23 @@ class AppleSignInHelper: NSObject, ASAuthorizationControllerDelegate, ASAuthoriz
         guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
               let appleIDToken = appleIDCredential.identityToken,
               let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-            completion(nil, "Apple Sign-In failed: unable to retrieve identity token")
+            completion(nil, nil, "Apple Sign-In failed: unable to retrieve identity token")
             return
         }
+        // Decode failure is not fatal: sign-in proceeds, callers just get no code.
+        let authorizationCode = appleIDCredential.authorizationCode
+            .flatMap { String(data: $0, encoding: .utf8) }
         // Use appleCredential to pass fullName — Apple only shares it on first sign-in
         let credential = OAuthProvider.appleCredential(
             withIDToken: idTokenString,
             rawNonce: rawNonce,
             fullName: appleIDCredential.fullName
         )
-        completion(credential, nil)
+        completion(credential, authorizationCode, nil)
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        completion(nil, error.localizedDescription)
+        completion(nil, nil, error.localizedDescription)
     }
 }
 #endif
