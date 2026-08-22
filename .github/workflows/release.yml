@@ -18,13 +18,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Cache Swift packages
+      - name: Cache Xcode DerivedData
         uses: actions/cache@v6
         with:
-          path: GodotFirebaseiOS/.build/xcodebuild/SourcePackages
-          key: ${{ runner.os }}-xcode-spm-${{ hashFiles('GodotFirebaseiOS/Package.resolved') }}
+          path: GodotFirebaseiOS/.build/xcodebuild
+          key: ${{ runner.os }}-xcode-${{ hashFiles('GodotFirebaseiOS/Package.resolved', 'GodotFirebaseiOS/Sources/**') }}
           restore-keys: |
-            ${{ runner.os }}-xcode-spm-
+            ${{ runner.os }}-xcode-
 
       - name: Cache Firebase SDK
         uses: actions/cache@v6
