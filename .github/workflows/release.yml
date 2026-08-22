@@ -21,14 +21,16 @@ jobs:
       - name: Cache Swift packages
         uses: actions/cache@v6
         with:
-          path: |
-            GodotFirebaseiOS/.build/checkouts
-            GodotFirebaseiOS/.build/repositories
-            GodotFirebaseiOS/.build/artifacts
-            GodotFirebaseiOS/.build/prebuilts
-          key: ${{ runner.os }}-spm-${{ hashFiles('GodotFirebaseiOS/Package.resolved') }}
+          path: GodotFirebaseiOS/.build/xcodebuild/SourcePackages
+          key: ${{ runner.os }}-xcode-spm-${{ hashFiles('GodotFirebaseiOS/Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-spm-
+            ${{ runner.os }}-xcode-spm-
+
+      - name: Cache Firebase SDK
+        uses: actions/cache@v6
+        with:
+          path: firebase_sdk
+          key: firebase-sdk-${{ hashFiles('Makefile') }}
 
       - name: Install XcodeGen
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install xcodegen
