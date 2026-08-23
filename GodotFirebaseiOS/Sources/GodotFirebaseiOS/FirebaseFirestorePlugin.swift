@@ -504,7 +504,10 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
         var result: [String: Any] = [:]
         let keys = gdDict.keys()
         for i in 0..<keys.size() {
-            guard let keyVariant = keys[Int(i)],
+            // Element reads must use get(index:). The VariantArray subscript returns nil
+            // for every index when called from this framework, which turns each write
+            // payload into an empty document while every call still reports success.
+            guard let keyVariant = keys.get(index: i),
                   let keyStr = String(keyVariant) else { continue }
             guard let value = gdDict[keyVariant] else { continue }
 
@@ -572,7 +575,7 @@ class FirebaseFirestorePlugin: RefCounted, @unchecked Sendable {
     private func gdArrayToSwift(_ gdArray: GArray) -> [Any] {
         var result: [Any] = []
         for i in 0..<gdArray.size() {
-            guard let variant = gdArray[Int(i)] else { continue }
+            guard let variant = gdArray.get(index: i) else { continue }
             result.append(variantToSwift(variant))
         }
         return result
