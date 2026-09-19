@@ -79,7 +79,7 @@ class FirebaseAnalyticsPlugin: RefCounted, @unchecked Sendable {
         var result: [String: Any] = [:]
         let keys = gdDict.keys()
         for i in 0..<keys.size() {
-            guard let keyVariant = keys[Int(i)],
+            guard let keyVariant = keys.get(index: i),
                   let keyStr = String(keyVariant) else { continue }
             guard let value = gdDict[keyVariant] else { continue }
             switch value.gtype {

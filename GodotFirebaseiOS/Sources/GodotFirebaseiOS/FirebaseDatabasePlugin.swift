@@ -180,7 +180,7 @@ class FirebaseDatabasePlugin: RefCounted, @unchecked Sendable {
             var result: [String: Any] = [:]
             let keys = gdDict.keys()
             for i in 0..<keys.size() {
-                let key = keys[Int(i)]
+                let key = keys.get(index: i)
                 if let keyStr = String(key), let value = gdDict[key] {
                     result[keyStr] = variantToSwift(value)
                 }
@@ -190,7 +190,7 @@ class FirebaseDatabasePlugin: RefCounted, @unchecked Sendable {
             guard let gdArray = GArray(variant) else { return [Any]() }
             var result: [Any] = []
             for i in 0..<gdArray.size() {
-                if let item = gdArray[Int(i)] {
+                if let item = gdArray.get(index: i) {
                     result.append(variantToSwift(item) ?? NSNull())
                 }
             }
