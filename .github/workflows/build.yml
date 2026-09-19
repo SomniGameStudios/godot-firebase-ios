@@ -12,13 +12,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Resolve Xcode cache version
+        id: xcode_version
+        shell: bash
+        run: |
+          xcode_version="$(xcodebuild -version)"
+          digest="$(printf '%s' "$xcode_version" | shasum -a 256 | cut -d ' ' -f 1)"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
       - name: Cache Xcode DerivedData
         uses: actions/cache@v6
         with:
           path: GodotFirebaseiOS/.build/xcodebuild
-          key: ${{ runner.os }}-xcode-${{ hashFiles('GodotFirebaseiOS/Package.resolved', 'GodotFirebaseiOS/Sources/**') }}
+          key: ${{ runner.os }}-xcode-${{ steps.xcode_version.outputs.digest }}-${{ hashFiles('GodotFirebaseiOS/Package.resolved', 'GodotFirebaseiOS/Sources/**') }}
           restore-keys: |
-            ${{ runner.os }}-xcode-
+            ${{ runner.os }}-xcode-${{ steps.xcode_version.outputs.digest }}-
 
       - name: Cache Firebase SDK
         uses: actions/cache@v6
