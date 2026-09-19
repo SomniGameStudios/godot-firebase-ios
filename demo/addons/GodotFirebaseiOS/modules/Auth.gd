@@ -65,6 +65,14 @@ func link_with_apple() -> void:
 	if _plugin:
 		_plugin.link_with_apple()
 
+## Returns the Apple authorizationCode captured by the most recent
+## sign_in_with_apple() or link_with_apple() attempt, or "" when none was
+## obtained. Single use, expires roughly 5 minutes after issuance.
+func get_last_apple_authorization_code() -> String:
+	if _plugin:
+		return _plugin.get_last_apple_authorization_code()
+	return ""
+
 func sign_out() -> void:
 	if _plugin:
 		_plugin.sign_out()
