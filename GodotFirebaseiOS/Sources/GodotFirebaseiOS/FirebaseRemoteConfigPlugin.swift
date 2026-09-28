@@ -26,7 +26,7 @@ class FirebaseRemoteConfigPlugin: RefCounted, @unchecked Sendable {
         var swiftDefaults: [String: NSObject] = [:]
         let keys = defaults.keys()
         for i in 0..<keys.size() {
-            guard let keyVariant = keys[Int(i)],
+            guard let keyVariant = keys.get(index: i),
                   let keyStr = String(keyVariant) else { continue }
             guard let value = defaults[keyVariant] else { continue }
             swiftDefaults[keyStr] = variantToNSObject(value)
