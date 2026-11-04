@@ -4,13 +4,13 @@
 # because the make that ships with macOS (3.81) silently ignores .SHELLFLAGS.
 SHELL := /bin/bash
 
-FIREBASE_VERSION = 11.15.0
+FIREBASE_VERSION = 12.19.3
 FIREBASE_ZIP_URL = https://github.com/firebase/firebase-ios-sdk/releases/download/$(FIREBASE_VERSION)/Firebase.zip
 
 ROOT_DIR := $(shell pwd)
 SDK_DIR = $(ROOT_DIR)/firebase_sdk
 ADDON_DIR = $(ROOT_DIR)/demo/addons/GodotFirebaseiOS
-BUILD_DIR = $(ROOT_DIR)/GodotFirebaseiOS/.build
+BUILD_DIR = $(ROOT_DIR)/GodotFirebaseiOS/.build/firebase-$(FIREBASE_VERSION)
 
 FRAMEWORKS = \
 	AppAuth.xcframework \
@@ -35,11 +35,13 @@ FRAMEWORKS = \
 	FirebaseSharedSwift.xcframework \
 	GTMAppAuth.xcframework \
 	GTMSessionFetcher.xcframework \
+	GoogleAdsOnDeviceConversion.xcframework \
 	GoogleAppMeasurement.xcframework \
 	GoogleAppMeasurementIdentitySupport.xcframework \
 	GoogleDataTransport.xcframework \
 	GoogleSignIn.xcframework \
 	GoogleUtilities.xcframework \
+	Promises.xcframework \
 	RecaptchaInterop.xcframework \
 	absl.xcframework \
 	grpc.xcframework \
@@ -49,46 +51,21 @@ FRAMEWORKS = \
 	openssl_grpc.xcframework
 
 
-.PHONY: all setup setup-sdk setup-project build clean
+.PHONY: all setup setup-sdk setup-project build clean test test-link
 
 all: build
 
 setup: setup-sdk setup-project
 
 setup-sdk:
-	@if [ ! -d "$(SDK_DIR)" ] || [ ! -d "$(SDK_DIR)/ios-arm64" ]; then \
-		echo "→ Downloading Firebase SDK $(FIREBASE_VERSION)..."; \
-		rm -rf $(SDK_DIR); \
-		mkdir -p $(ROOT_DIR)/tmp_firebase_download; \
-		curl -L -o $(ROOT_DIR)/tmp_firebase_download/Firebase.zip $(FIREBASE_ZIP_URL); \
-		unzip -oq $(ROOT_DIR)/tmp_firebase_download/Firebase.zip -d $(ROOT_DIR)/tmp_firebase_download/extracted; \
-		find $(ROOT_DIR)/tmp_firebase_download/extracted -name "Firebase-*-latest.zip" -exec unzip -oq {} -d $(ROOT_DIR)/tmp_firebase_download/extracted \; ; \
-		echo "→ Copying required frameworks to $(SDK_DIR)..."; \
-		mkdir -p $(SDK_DIR); \
-		for fw in $(FRAMEWORKS); do \
-			find $(ROOT_DIR)/tmp_firebase_download/extracted -name "$$fw" -exec cp -R {} $(SDK_DIR)/ \; ; \
-		done; \
-		echo "→ Flattening framework slices..."; \
-		mkdir -p $(SDK_DIR)/ios-arm64; \
-		mkdir -p $(SDK_DIR)/ios-arm64_x86_64-simulator; \
-		for fw in $(FRAMEWORKS); do \
-			fw_name=$$(echo $$fw | sed 's/.xcframework//'); \
-			cp -R $(SDK_DIR)/$$fw/ios-arm64/$$fw_name.framework $(SDK_DIR)/ios-arm64/ 2>/dev/null || true; \
-			cp -R $(SDK_DIR)/$$fw/ios-arm64_x86_64-simulator/$$fw_name.framework $(SDK_DIR)/ios-arm64_x86_64-simulator/ 2>/dev/null || true; \
-		done; \
-		echo "→ Cleaning up temporary download files..."; \
-		rm -rf $(ROOT_DIR)/tmp_firebase_download; \
-		echo "✓ Firebase SDK setup complete."; \
-	else \
-		echo "✓ Firebase SDK already present at $(SDK_DIR)."; \
-	fi
+	@python3 scripts/setup_firebase_sdk.py "$(FIREBASE_VERSION)" "$(FIREBASE_ZIP_URL)" "$(SDK_DIR)" $(FRAMEWORKS)
 
 setup-project:
 	@echo "→ Generating Xcode project via XcodeGen..."
 	@PATH=/usr/local/bin:$$PATH xcodegen generate --spec $(ROOT_DIR)/GodotFirebaseiOS/project.yml --project $(ROOT_DIR)/GodotFirebaseiOS/
 	@echo "✓ Xcode project generated."
 
-build: setup-project
+build: setup-sdk setup-project
 	@echo "→ Building GodotFirebaseiOS for iOS Device..."
 	@set -o pipefail; xcodebuild -project $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj \
 		-scheme GodotFirebaseiOS \
@@ -126,7 +103,7 @@ build: setup-project
 	@touch $(ADDON_DIR)/frameworks/.gdignore
 	@cp -R $(ROOT_DIR)/GodotFirebaseiOS.xcframework $(ADDON_DIR)/frameworks/
 	@echo "→ Repackaging vendor frameworks (iOS-only)..."
-	@for fw in $(FRAMEWORKS); do \
+	@set -e; for fw in $(FRAMEWORKS); do \
 		fw_name=$$(echo $$fw | sed 's/.xcframework//'); \
 		device_fw="$(SDK_DIR)/$$fw/ios-arm64/$$fw_name.framework"; \
 		sim_fw="$(SDK_DIR)/$$fw/ios-arm64_x86_64-simulator/$$fw_name.framework"; \
@@ -151,3 +128,10 @@ clean:
 	@rm -rf $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj
 	@rm -rf $(ADDON_DIR)/frameworks
 	@echo "✓ Clean complete."
+
+test:
+	@python3 -m unittest discover -s tests -v
+
+# Force-load vendor archives as the Godot export does, without Firebase credentials.
+test-link: setup-sdk
+	@python3 scripts/test_firebase_link.py "$(SDK_DIR)" $(FRAMEWORKS)

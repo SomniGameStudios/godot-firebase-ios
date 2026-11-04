@@ -77,13 +77,27 @@ revision in [`GodotFirebaseiOS/Package.swift`](GodotFirebaseiOS/Package.swift)
 | Tool | Minimum |
 |------|---------|
 | Godot | 4.6.1+ |
-| Xcode | 15+ |
+| Xcode | 26.4.1+ |
 | iOS deployment target | 17+ |
-| macOS (build machine) | 14+ |
+| macOS (build machine) | 26.2+ |
+
+## Firebase SDK
+
+Both the binary build and Swift package pin Firebase Apple SDK **12.19.3**,
+which includes the [upstream Cloud Firestore security update](https://firebase.google.com/support/guides/compromised-emudhra-intermediate-ca).
+The iOS deployment target remains 17.0. Rebuild the plugin and replace the
+entire addon `frameworks/` directory; then rebuild and redistribute consuming
+apps. Updating source files alone does not update previously built binaries.
+
+`make build` verifies the SDK version and required device/simulator slices,
+replacing older, unversioned, or incomplete caches. Build products are isolated
+by Firebase version. Run `make test` for the offline SDK setup regression tests
+and `make test-link` to verify vendor linking for device and both simulator
+architectures without Firebase credentials.
 
 ## Development & Building
 
-To build the plugin from source, you need macOS with Xcode 15+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) installed.
+To build the plugin from source, you need macOS with Xcode 26.4.1+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) installed.
 
 1. **Setup dependencies**:
    ```bash

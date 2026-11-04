@@ -31,7 +31,7 @@ Designed to work alongside [GodotFirebaseAndroid](https://github.com/syntaxerror
 
 - Godot 4.4+
 - iOS deployment target 17+
-- Xcode 15+ and macOS 14+ (build machine)
+- Xcode 26.4.1+ and macOS 26.2+ (build machine)
 
 ## Cross-Platform (iOS + Android)
 
