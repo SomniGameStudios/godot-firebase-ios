@@ -24,7 +24,10 @@ jobs:
         uses: actions/cache@v6
         with:
           path: GodotFirebaseiOS/.build/firebase-*/xcodebuild
-          key: ${{ runner.os }}-xcode-${{ steps.xcode_version.outputs.digest }}-${{ hashFiles('Makefile', 'scripts/setup_firebase_sdk.py', 'GodotFirebaseiOS/project.yml', 'GodotFirebaseiOS/Package.swift', 'GodotFirebaseiOS/Package.resolved', 'GodotFirebaseiOS/Sources/**') }}
+          key: ${{ runner.os }}-xcode-${{ steps.xcode_version.outputs.digest }}-${{ hashFiles('Makefile', 'scripts/setup_firebase_sdk.py', 'GodotFirebaseiOS/project.yml', 'GodotFirebaseiOS/Package.swift', 'GodotFirebaseiOS/Package.resolved') }}-${{ hashFiles('GodotFirebaseiOS/Sources/**') }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-${{ steps.xcode_version.outputs.digest }}-${{ hashFiles('Makefile', 'scripts/setup_firebase_sdk.py', 'GodotFirebaseiOS/project.yml', 'GodotFirebaseiOS/Package.swift', 'GodotFirebaseiOS/Package.resolved') }}-
+            ${{ runner.os }}-xcode-${{ steps.xcode_version.outputs.digest }}-
 
       - name: Cache Firebase SDK
         uses: actions/cache@v6

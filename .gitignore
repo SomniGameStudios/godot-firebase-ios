@@ -28,6 +28,8 @@ GodotFirebaseiOS.xcframework/
 
 # Firebase SDK downloaded frameworks
 firebase_sdk/
+.firebase-download-*/
+.firebase-backup-*/
 demo/addons/GodotFirebaseiOS/*.xcframework/
 demo/addons/GodotFirebaseiOS/frameworks/*
 !demo/addons/GodotFirebaseiOS/frameworks/.gdignore

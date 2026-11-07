@@ -6,6 +6,7 @@ import re
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -82,6 +83,31 @@ class SDKSetupTests(unittest.TestCase):
         marker.write_text("11.15.0")
         with self.assertRaises(subprocess.CalledProcessError):
             self.install((self.root / "missing.zip").as_uri())
+        self.assertEqual(marker.read_text(), "11.15.0")
+
+    def test_failed_rename_restores_old_cache(self):
+        self.destination.mkdir()
+        marker = self.destination / ".firebase-version"
+        marker.write_text("11.15.0")
+        work = self.root / "work"
+        work.mkdir()
+        staged = self.root / "staged"
+        staged.mkdir()
+
+        call_count = 0
+        original_rename = Path.rename
+
+        def failing_rename(self_path, *args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 2:
+                raise OSError("Simulated second rename failure")
+            return original_rename(self_path, *args, **kwargs)
+
+        with mock.patch.object(Path, "rename", autospec=True, side_effect=failing_rename):
+            with self.assertRaises(OSError):
+                sdk._safe_replace(staged, self.destination, work)
+        self.assertTrue(self.destination.exists())
         self.assertEqual(marker.read_text(), "11.15.0")
 
     def test_incomplete_or_wrong_version_archive_is_rejected(self):

@@ -12,9 +12,8 @@
 ## Build
 
 ```bash
-cd GodotFirebaseiOS
-./build_and_copy.sh        # Debug
-./build_and_copy.sh r      # Release
+make setup   # Download Firebase SDK and generate Xcode project
+make build   # Compile framework and package vendor dependencies into demo/addons/GodotFirebaseiOS/
 ```
 
 The compiled framework is copied automatically to `demo/addons/GodotFirebaseiOS/`.

@@ -28,6 +28,18 @@ def validate(root, version, frameworks):
 
 
 
+def _safe_replace(staged, destination, work):
+    old_cache = work / "old_sdk"
+    if destination.exists():
+        destination.rename(old_cache)
+    try:
+        staged.rename(destination)
+    except BaseException:
+        if old_cache.exists() and not destination.exists():
+            old_cache.rename(destination)
+        raise
+
+
 def install(version, url, destination, frameworks):
     marker = destination / ".firebase-version"
     try:
@@ -59,9 +71,7 @@ def install(version, url, destination, frameworks):
                 shutil.copytree(staged / framework / slice_name / name, staged / slice_name / name)
         validate(staged, version, frameworks)
         (staged / ".firebase-version").write_text(version + "\n")
-        if destination.exists():
-            shutil.rmtree(destination)
-        staged.rename(destination)
+        _safe_replace(staged, destination, work)
         print(f"Firebase SDK {version} installed and verified")
 
 

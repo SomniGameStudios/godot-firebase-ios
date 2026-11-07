@@ -111,8 +111,7 @@ build: setup-sdk setup-project
 			xcodebuild -create-xcframework \
 				-framework "$$device_fw" \
 				-framework "$$sim_fw" \
-				-output "$(ADDON_DIR)/frameworks/$$fw" \
-				2>/dev/null; \
+				-output "$(ADDON_DIR)/frameworks/$$fw"; \
 		else \
 			echo "  ⚠ Copying $$fw as-is (missing expected slices)"; \
 			cp -R $(SDK_DIR)/$$fw $(ADDON_DIR)/frameworks/; \
@@ -122,11 +121,11 @@ build: setup-sdk setup-project
 
 clean:
 	@echo "→ Cleaning build files..."
-	@rm -rf $(BUILD_DIR)
+	@rm -rf $(ROOT_DIR)/GodotFirebaseiOS/.build
 	@rm -rf $(SDK_DIR)
 	@rm -rf $(ROOT_DIR)/GodotFirebaseiOS.xcframework
 	@rm -rf $(ROOT_DIR)/GodotFirebaseiOS/GodotFirebaseiOS.xcodeproj
-	@rm -rf $(ADDON_DIR)/frameworks
+	@[ -d $(ADDON_DIR)/frameworks ] && find $(ADDON_DIR)/frameworks -mindepth 1 ! -name ".gdignore" -exec rm -rf {} + || true
 	@echo "✓ Clean complete."
 
 test:
