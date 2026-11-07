@@ -10,7 +10,7 @@ make build          # Build release xcframework and copy files to addon director
 make clean          # Clean build files and downloaded SDKs
 ```
 
-Output framework is copied to `demo/addons/GodotFirebaseiOS/`. Requires macOS with Xcode 15+.
+Output framework is copied to `demo/addons/GodotFirebaseiOS/`. Requires macOS with Xcode 26.4.1+.
 
 ## Run the Demo
 

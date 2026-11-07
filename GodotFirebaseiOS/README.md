@@ -19,7 +19,7 @@ and exposes Firebase Authentication as `@Callable` functions and `@Signal` prope
 | Package | Requirement | Resolved |
 |---------|-------------|---------|
 | [SwiftGodot](https://github.com/migueldeicaza/SwiftGodot) | pinned revision `61f258c` | — |
-| [firebase-ios-sdk](https://github.com/firebase/firebase-ios-sdk) | >= 11.0.0 | 11.15.0 |
+| [firebase-ios-sdk](https://github.com/firebase/firebase-ios-sdk) | exactly 12.19.3 | 12.19.3 |
 | [GoogleSignIn-iOS](https://github.com/google/GoogleSignIn-iOS) | >= 9.1.0 | 9.1.0 |
 
 ---
